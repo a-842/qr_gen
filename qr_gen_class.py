@@ -1,35 +1,75 @@
+import codecs
+
 import qr_raw_data as raw
 from icecream import ic
+import numpy as np
+
 
 class QR_Code_String:
+
     def __init__(self, data_type, data, eclevel):
         self.data_type = data_type  # 0: Numeric, 1: AlphaNumeric, 2: Binary
         self.data = data
+        self.eclevel = eclevel
         self.current_index = 0
         self.history = []
         self.version = 0
         self.size = 0
-
-
+        self.binary_data = ''
+        self.full_binary = ''
 
         # Initialise matrix size and version
-        length = len(data)
-		  ic(length)
+        self.length = len(data)
+        ic(self.length)
         v_list = raw.version_data[data_type][eclevel]
-        self.version = self.first_largest(v_list, length)
-		  ic(self.version)
+        self.version = self.first_largest(v_list, self.length)+1
+        ic(self.version)
         self.size = 17 + (self.version * 4)
-        self.matrix = [["" for _ in range(self.size)] for _ in range(self.size)]
+        self.matrix = np.empty((self.size, self.size), dtype=object)
 
     def __repr__(self):
 
-    mapping = {1: "█", 0: " ", "v": "v", "":"-"}
-    
+        mapping = {"1": "█", "0": " ", "f": "f", "v": "v", }
 
-    return "\n".join(
-        "".join(mapping.get(cell, str(cell)) for cell in row) 
-        for row in self.matrix
-    )
+        build = ''
+        for row in self.matrix:
+            for col in row:
+                if col == None:
+                    build += "-"
+                else:
+                    build += mapping[str(col)]
+            build += '\n'
+        return build
+
+    def build_string(self):
+        # add encoding
+        self.full_binary += raw.encodings[self.data_type]
+        # add message length
+        message_length_binary = bin(self.length)[2:].zfill(8)
+        ic(message_length_binary)
+        self.full_binary += message_length_binary
+        # add actual data
+        self.full_binary += self.binary_data
+        ic(self.full_binary)
+
+    def encode(self):
+        if self.data_type == 0:
+            self.encode_numeric()
+        if self.data_type == 1:
+            self.encode_alphanumeric()
+        if self.data_type == 2:
+            self.encode_ISO_8859_1()
+
+    def encode_numeric(self):
+        pass
+    def encode_alphanumeric(self):
+        pass
+    def encode_ISO_8859_1(self):
+        encoded = codecs.encode(self.data)
+        self.binary_data = ''.join(f'{byte:08b}' for byte in encoded)
+        ic(self.binary_data)
+
+
 
 
     @staticmethod
@@ -39,7 +79,6 @@ class QR_Code_String:
             if x > value:
                 return i
         return None
-
 
     def add_positions(self):
 
@@ -60,20 +99,25 @@ class QR_Code_String:
             for j in range(7):
                 self.matrix[self.size - 7 + i][j] = pattern[i][j]
 
-	def add_padding(self):
-		for i in range(7):
-			self.matrix[8][i] = 0
-			self.matrix[self.size - 8]
+    def add_padding(self):
 
+        for i in range(8):
+            self.matrix[i][7] = 0
+            self.matrix[i][self.size - 8] = 0
+            self.matrix[self.size - 8 + i][7] = 0
+        for j in range(7):
+            self.matrix[7][j] = 0
+            self.matrix[self.size - 8][j] = 0
+            self.matrix[7][self.size - 7 + j] = 0
 
     def add_timing(self):
-         # Add the horizontal timing pattern
+        # Add the horizontal timing pattern
         for i in range(8, self.size - 8):
-            self.matrix[6][i] = (i+1) % 2
+            self.matrix[6][i] = (i + 1) % 2
 
         # Add the vertical timing pattern
         for i in range(8, self.size - 8):
-            self.matrix[i][6] = (i+1) % 2
+            self.matrix[i][6] = (i + 1) % 2
 
     def add_alignment(self):
         if self.version > 1:
@@ -84,14 +128,20 @@ class QR_Code_String:
             placements.remove((min(needed), max(needed)))
             placements.remove((max(needed), min(needed)))
 
-
             ic(placements)
-				pattern = raw.alignment_pattern
-			  
-			  	for placement in placements:
-					for i in range(5):
-						for j in range(5):
-							self.matrix[placement[0] - 2 + i][placement[1] - 2 + j] = pattern[i][j]
+            pattern = raw.alignment_pattern
+
+            for placement in placements:
+                for i in range(5):
+                    for j in range(5):
+                        self.matrix[placement[0] - 2 + i][placement[1] - 2 + j] = pattern[i][j]
+
+    def reserve_format_strip(self):
+        for i in range(8):
+            if self.matrix[i][8] == None:
+                self.matrix[8][i] = "f"
+            if self.matrix[i][self.size - 8 + i] == None:
+                self.matrix[8][self.size - 8 + i] = "f"
 
 
 
@@ -99,14 +149,8 @@ class QR_Code_String:
 
 
 
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    import qr_gen_tester
 
 
 
