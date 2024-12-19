@@ -8,7 +8,7 @@ import numpy as np
 class QR_Code_String:
 
     def __init__(self, data_type, data, eclevel):
-        self.data_type = data_type  # 0: Numeric, 1: AlphaNumeric, 2: Binary
+        self.data_type = data_type
         self.data = data
         self.eclevel = eclevel
         self.current_index = 0
@@ -21,8 +21,9 @@ class QR_Code_String:
         # Initialise matrix size and version
         self.length = len(data)
         ic(self.length)
+
         v_list = raw.version_data[data_type][eclevel]
-        self.version = self.first_largest(v_list, self.length)+1
+        self.version = self.first_largest(v_list, self.length)
         ic(self.version)
         self.size = 17 + (self.version * 4)
         self.matrix = np.empty((self.size, self.size), dtype=object)
@@ -50,14 +51,34 @@ class QR_Code_String:
         self.full_binary += message_length_binary
         # add actual data
         self.full_binary += self.binary_data
+        # add terminator
+        self.full_binary += "0000"
+        # add padding
+        padding_needed = (8 - len(self.full_binary) % 8) % 8
+        ic(padding_needed)
+        self.full_binary += "0"*padding_needed
         ic(self.full_binary)
+        # add excess bytes
+        bytes_needed = raw.byte_counts[self.version][self.eclevel]
+        ic(bytes_needed)
+        f = True
+        while len(self.full_binary)/8 != bytes_needed:
+            if f:
+                self.full_binary += '11101100'
+            else:
+                self.full_binary += '00010001'
+            f = not f
+
+        ic(self.full_binary)
+
+
 
     def encode(self):
         if self.data_type == 0:
             self.encode_numeric()
-        if self.data_type == 1:
+        elif self.data_type == 1:
             self.encode_alphanumeric()
-        if self.data_type == 2:
+        elif self.data_type == 2:
             self.encode_ISO_8859_1()
 
     def encode_numeric(self):
@@ -69,15 +90,11 @@ class QR_Code_String:
         self.binary_data = ''.join(f'{byte:08b}' for byte in encoded)
         ic(self.binary_data)
 
-
-
-
     @staticmethod
-    def first_largest(sorted_list, value):
-
-        for i, x in enumerate(sorted_list):
-            if x > value:
-                return i
+    def first_largest(data_dict, value):
+        for key, val in data_dict.items():
+            if val > value:
+                return key
         return None
 
     def add_positions(self):
