@@ -74,11 +74,11 @@ class QR_Code_String:
 
 
     def encode(self):
-        if self.data_type == 0:
+        if self.data_type == "numeric":
             self.encode_numeric()
-        elif self.data_type == 1:
+        elif self.data_type == "alphanumeric":
             self.encode_alphanumeric()
-        elif self.data_type == 2:
+        elif self.data_type == "bytes":
             self.encode_ISO_8859_1()
 
     def encode_numeric(self):
