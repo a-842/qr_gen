@@ -30,7 +30,7 @@ class QR_Code_String:
 
     def __repr__(self):
 
-        mapping = {"1": "█", "0": " ", "f": "f", "v": "v", }
+        mapping = {"1": "█", "0": " ", "f": "f", "v": "v",  }
 
         build = ''
         for row in self.matrix:
@@ -153,12 +153,56 @@ class QR_Code_String:
                     for j in range(5):
                         self.matrix[placement[0] - 2 + i][placement[1] - 2 + j] = pattern[i][j]
 
+    def add_unchanging_bit(self):
+        self.matrix[((4*self.version)+9)][8] = 1
+
     def reserve_format_strip(self):
         for i in range(8):
-            if self.matrix[i][8] == None:
+            if self.matrix[8][i] == None:
                 self.matrix[8][i] = "f"
-            if self.matrix[i][self.size - 8 + i] == None:
+            if self.matrix[8][self.size - 8 + i] == None:
                 self.matrix[8][self.size - 8 + i] = "f"
+            if self.matrix[i][8] == None:
+                self.matrix[i][8] = "f"
+            if self.matrix[self.size - 8 + i][8] == None:
+                self.matrix[self.size - 8 + i][8] = "f"
+        self.matrix[8][8] = "f"
+
+    def reserve_version_info(self):
+        if self.version >= 7:
+            print("QR codes Version 7 and above are not supported yet")
+
+    def place_data(self):
+        ic("placing data")
+        toadd = self.full_binary
+        colomnpart = -1 #-1 is right , 1 is left
+        upordown = -1 # -1 is up and 1 is down
+        currentx = self.size-1
+        currenty = self.size-1
+        while len(toadd) > 0:
+            ic("round")
+            if currenty == -1 or currenty == self.size:
+                currenty -= upordown
+                currentx -= 2
+                colomnpart = -1
+                upordown *= -1
+
+            if self.matrix[currenty][currentx] is None:
+                self.matrix[currenty][currentx] = toadd[0]
+                ic(toadd[0])
+                toadd = toadd[1:]
+
+            if colomnpart == 1:
+                colomnpart = -1
+                currenty += upordown
+                currentx += 1
+            elif colomnpart == -1:
+                colomnpart = 1
+                currentx -= 1
+
+
+
+
 
 
 
