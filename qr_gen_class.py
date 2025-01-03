@@ -1,8 +1,12 @@
 import codecs
 
+from numpy.ma.core import masked
+
 import qr_raw_data as raw
 from icecream import ic
 import numpy as np
+
+from reedsolo import RSCodec
 
 
 class QR_Code_String:
@@ -17,6 +21,9 @@ class QR_Code_String:
         self.size = 0
         self.binary_data = ''
         self.full_binary = ''
+        self.format_strip = ''
+
+        self.mask_id = 7
 
         # Initialise matrix size and version
         self.length = len(data)
@@ -30,7 +37,7 @@ class QR_Code_String:
 
     def __repr__(self):
 
-        mapping = {"1": "█", "0": " ", "f": "f", "v": "v",  }
+        mapping = {"1": "█", "0": " ", "i": "▓", "o": "░", "f": "f", "v": "v",  }
 
         build = ''
         for row in self.matrix:
@@ -68,6 +75,10 @@ class QR_Code_String:
             else:
                 self.full_binary += '00010001'
             f = not f
+
+        ic(self.full_binary)
+
+        self.full_binary = self.add_reed_solomon_code(self.full_binary)
 
         ic(self.full_binary)
 
@@ -180,7 +191,7 @@ class QR_Code_String:
         currentx = self.size-1
         currenty = self.size-1
         while len(toadd) > 0:
-            ic("round")
+
             if currenty == -1 or currenty == self.size:
                 currenty -= upordown
                 currentx -= 2
@@ -189,7 +200,7 @@ class QR_Code_String:
 
             if self.matrix[currenty][currentx] is None:
                 self.matrix[currenty][currentx] = toadd[0]
-                ic(toadd[0])
+
                 toadd = toadd[1:]
 
             if colomnpart == 1:
@@ -200,9 +211,77 @@ class QR_Code_String:
                 colomnpart = 1
                 currentx -= 1
 
+    def add_reed_solomon_code(self, current_full):
+        ec_blocks = raw.error_correction_blocks[self.version][self.eclevel]
+        byte_array = []
+        for i in range(0, len(current_full), 8):
+            byte = current_full[i:i + 8]
+            byte_array.append(int(byte, 2))
+
+        rs = RSCodec(ec_blocks)
+        encoded_data = rs.encode(byte_array)
+        return ''.join(f"{byte:08b}" for byte in encoded_data).replace("1", "i").replace("0", "o")
+
+    def apply_mask(self):
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.matrix[i][j] == "i":
+                    if self.mask_pattern(self.mask_id, i, j):
+                        self.matrix[i][j] = "o"
+
+                elif self.matrix[i][j] == "o":
+                    if self.mask_pattern(self.mask_id, i, j):
+                        self.matrix[i][j] = "i"
 
 
+    def mask_pattern(self, mask_id, i, j):
+        if mask_id == 0:
+            return (i + j) % 2 == 0
+        elif mask_id == 1:
+            return i % 2 == 0
+        elif mask_id == 2:
+            return j % 3 == 0
+        elif mask_id == 3:
+            return (i + j) % 3 == 0
+        elif mask_id == 4:
+            return (i // 2 + j // 3) % 2 == 0
+        elif mask_id == 5:
+            return (i * j) % 2 + (i * j) % 3 == 0
+        elif mask_id == 6:
+            return ((i * j) % 2 + (i * j) % 3) % 2 == 0
+        elif mask_id == 7:
+            return ((i + j) % 2 + (i * j) % 3) % 2 == 0
+        else:
+            raise ValueError("Invalid mask_id")
 
+    def add_format_strip(self):
+        # add error correction level
+        if self.eclevel not in raw.error_correction_bits or not (0 <= self.mask_id <= 7):
+            raise ValueError("Invalid EC level or mask ID")
+
+        # Step 1: Combine EC level and mask ID
+        ec_bits = raw.error_correction_bits[self.eclevel]
+        mask_bits = f"{self.mask_id:03b}"
+        combined_bits = ec_bits + mask_bits
+
+        # Step 2: Polynomial division (XOR)
+        generator = 0b10100110111  # Generator polynomial
+        combined_int = int(combined_bits, 2) << 10  # Shift left by 10 bits for division
+        for i in range(len(combined_bits)):
+            if combined_int & (1 << (14 - i)):  # Check the highest bit
+                combined_int ^= generator << (4 - i)
+
+        # Step 3: Add remainder (10 bits)
+        error_bits = combined_int & 0b1111111111  # Last 10 bits
+        format_bits = int(combined_bits, 2) << 10 | error_bits
+
+        # Step 4: Apply masking XOR pattern
+        mask_pattern = 0b101010000010010
+        final_format = format_bits ^ mask_pattern
+
+        # Convert to 15-bit binary string
+        self.format_strip =  f"{final_format:015b}"
+        ic(self.format_strip)
 
 
 
