@@ -8,6 +8,8 @@ import numpy as np
 
 from reedsolo import RSCodec
 
+import qrcode
+
 
 class QR_Code_String:
 
@@ -30,10 +32,13 @@ class QR_Code_String:
         ic(self.length)
 
         v_list = raw.version_data[data_type][eclevel]
-        self.version = self.first_largest(v_list, self.length)
+        ic(v_list)
+
+        self.version = QR_Code_String.first_largest(v_list, self.length)
         ic(self.version)
         self.size = 17 + (self.version * 4)
         self.matrix = np.empty((self.size, self.size), dtype=object)
+        ic(self.matrix)
 
         self.build(self.size)
 
@@ -68,11 +73,11 @@ class QR_Code_String:
         self.matrix = self.reserve_format_strip(self.matrix, size)
         self.matrix = self.reserve_version_info(self.matrix, self.version)
         print(self, "\n\n\n\n")
-        self.place_data()
+        self.matrix = self.place_data(self.matrix, self.size, self.full_binary)
         print(self, "\n\n\n\n")
-        self.apply_mask()
+        self.matrix = self.apply_mask(self.matrix, self.size, self.mask_id)
         print(self, "\n\n\n\n")
-        self.add_format_strip()
+        self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
         print(self, "\n\n\n\n")
 
     def build_string(self):
@@ -104,9 +109,10 @@ class QR_Code_String:
 
         ic(self.full_binary)
 
-        self.full_binary = self.add_reed_solomon_code2(self.full_binary)
+        self.full_binary = self.calculate_reed_solomon_code2(self.full_binary, self.version, self.eclevel)
 
         ic(self.full_binary)
+        ic(len(self.full_binary))
 
 
 
@@ -121,9 +127,31 @@ class QR_Code_String:
             self.encode_ISO_8859_1()
 
     def encode_numeric(self):
-        pass
+        self.binary_data = ''
+        for i in range(0, len(self.data), 3):
+            group = self.data[i:i + 3]
+            if len(group) == 3:
+                self.binary_data += f'{int(group):010b}'  # 3 digits -> 10 bits
+            elif len(group) == 2:
+                self.binary_data += f'{int(group):07b}'  # 2 digits -> 7 bits
+            elif len(group) == 1:
+                self.binary_data += f'{int(group):04b}'  # 1 digit -> 4 bits
+
     def encode_alphanumeric(self):
-        pass
+
+        self.binary_data = ''
+        for i in range(0, len(self.data), 2):
+            group = self.data[i:i + 2]
+            if len(group) == 2:
+                # Two characters -> 11 bits
+                value = raw.alphanumeric_table[group[0]] * 45 + raw.alphanumeric_table[group[1]]
+                self.binary_data += f'{value:011b}'
+            elif len(group) == 1:
+                # One character -> 6 bits
+                value = raw.alphanumeric_table[group[0]]
+                self.binary_data += f'{value:06b}'
+
+
     def encode_ISO_8859_1(self):
         encoded = codecs.encode(self.data)
         self.binary_data = ''.join(f'{byte:08b}' for byte in encoded)
@@ -131,14 +159,14 @@ class QR_Code_String:
 
     @staticmethod
     def first_largest(data_dict, value):
-        for key, val in sorted(data_dict.items()):
-            if val >= value:
+        for key, val in data_dict.items():
+            if val > value:
                 return key
-        return max(data_dict.keys())
+        raise Exception("too much data")
 
 
     @staticmethod
-    def add_positions(self, matrix, size):
+    def add_positions(matrix, size):
 
         pattern = raw.position_pattern
 
@@ -159,7 +187,7 @@ class QR_Code_String:
         return matrix
 
     @staticmethod
-    def add_padding(self, matrix, size):
+    def add_padding(matrix, size):
 
         for i in range(8):
             matrix[i][7] = 0
@@ -173,7 +201,7 @@ class QR_Code_String:
         return matrix
 
     @staticmethod
-    def add_timing(self, matrix, size):
+    def add_timing(matrix, size):
         # Add the horizontal timing pattern
         for i in range(8, size - 8):
             matrix[6][i] = (i + 1) % 2
@@ -185,7 +213,7 @@ class QR_Code_String:
         return matrix
 
     @staticmethod
-    def add_alignment(self, matrix, version):
+    def add_alignment(matrix, version):
         if version > 1:
 
             needed = raw.alignment_pattern_locations[version]
@@ -204,12 +232,12 @@ class QR_Code_String:
         return matrix
 
     @staticmethod
-    def add_unchanging_bit(self, matrix, version):
+    def add_unchanging_bit(matrix, version):
         matrix[((4*version)+9)][8] = 1
         return matrix
 
     @staticmethod
-    def reserve_format_strip(self, matrix, size):
+    def reserve_format_strip(matrix, size):
         for i in range(8):
             if matrix[8][i] is None:
                 matrix[8][i] = "f"
@@ -223,20 +251,25 @@ class QR_Code_String:
         return matrix
 
     @staticmethod
-    def reserve_version_info(self, matrix, version):
+    def reserve_version_info(matrix, version):
         if version >= 7:
             print("QR codes Version 7 and above are not supported yet")
 
+        return matrix
+
     @staticmethod
-    def place_data(self, matrix, size, full_binary):
+    def place_data(matrix, size, full_binary):
         ic("placing data")
+        ic(size-1)
         toadd = full_binary
         colomnpart = -1 #-1 is right , 1 is left
         upordown = -1 # -1 is up and 1 is down
         currentx = size-1
         currenty = size-1
+        failcount = 0
         while len(toadd) > 0:
-
+            ic(currentx, currenty)
+            ic(len(toadd))
             if currenty == -1 or currenty == size:
                 currenty -= upordown
                 currentx -= 2
@@ -247,6 +280,9 @@ class QR_Code_String:
                 matrix[currenty][currentx] = toadd[0]
 
                 toadd = toadd[1:]
+            else:
+                failcount +=1
+                ic(failcount)
 
             if colomnpart == 1:
                 colomnpart = -1
@@ -256,8 +292,11 @@ class QR_Code_String:
                 colomnpart = 1
                 currentx -= 1
 
-    def add_reed_solomon_code(self, current_full, version, eclevel):
-        ec_blocks = raw.error_correction_blocks[self.version][self.eclevel]
+        return matrix
+
+    @staticmethod
+    def calculate_reed_solomon_code(current_full, version, eclevel):
+        ec_blocks = raw.error_correction_blocks[version][eclevel]
         byte_array = []
         for i in range(0, len(current_full), 8):
             byte = current_full[i:i + 8]
@@ -267,13 +306,14 @@ class QR_Code_String:
         encoded_data = rs.encode(byte_array)
         return ''.join(f"{byte:08b}" for byte in encoded_data).replace("1", "i").replace("0", "o")
 
-    def add_reed_solomon_code2(self, current_full):
-        # Get the number of data codewords and error correction codewords per block
-        ec_blocks = raw.error_correction_blocks[self.version][self.eclevel]
-        total_data_codewords = raw.byte_counts[self.version][self.eclevel]
+    @staticmethod
+    def calculate_reed_solomon_code2(current_full, version, eclevel):
+        # Get error correction and data information
+        ec_blocks = raw.error_correction_blocks[version][eclevel]  # Parity bytes per block
+        total_data_codewords = raw.byte_counts[version][eclevel]
         total_codewords = total_data_codewords + ec_blocks
 
-        # Convert the full binary string into a list of bytes
+        # Convert the binary string into a list of bytes
         data_bytes = [
             int(current_full[i:i + 8], 2) for i in range(0, len(current_full), 8)
         ]
@@ -292,9 +332,9 @@ class QR_Code_String:
             start += size
 
         # Generate error correction bytes for each block
-        rs = RSCodec(ec_blocks)  # Initialize the Reed-Solomon encoder
         ec_blocks_bytes = []
         for block in blocks:
+            rs = RSCodec(len(block))  # Initialize RSCodec with block size
             ec_bytes = rs.encode(block)[-ec_blocks:]  # Generate parity bytes
             ec_blocks_bytes.append(ec_bytes)
 
@@ -310,26 +350,29 @@ class QR_Code_String:
 
         # Interleave error correction bytes
         for i in range(ec_blocks):
-            for block in ec_blocks_bytes:
-                interleaved_data.append(block[i])
+            for ec_block in ec_blocks_bytes:
+                if i < len(ec_block):
+                    interleaved_data.append(ec_block[i])
 
         # Convert interleaved data back to binary string
         interleaved_binary = ''.join(f'{byte:08b}' for byte in interleaved_data)
         return interleaved_binary
 
-    def apply_mask(self):
-        for i in range(self.size):
-            for j in range(self.size):
-                if self.matrix[i][j] == "i":
-                    if self.mask_pattern(self.mask_id, i, j):
-                        self.matrix[i][j] = "o"
+    @staticmethod
+    def apply_mask(matrix, size, mask_id):
+        for i in range(size):
+            for j in range(size):
+                if matrix[i][j] == "i":
+                    if QR_Code_String.mask_pattern(mask_id, i, j):
+                        matrix[i][j] = "o"
 
-                elif self.matrix[i][j] == "o":
-                    if self.mask_pattern(self.mask_id, i, j):
-                        self.matrix[i][j] = "i"
+                elif matrix[i][j] == "o":
+                    if QR_Code_String.mask_pattern(mask_id, i, j):
+                        matrix[i][j] = "i"
+        return matrix
 
-
-    def mask_pattern(self, mask_id, i, j):
+    @staticmethod
+    def mask_pattern(mask_id, i, j):
         if mask_id == 0:
             return (i + j) % 2 == 0
         elif mask_id == 1:
@@ -349,15 +392,16 @@ class QR_Code_String:
         else:
             raise ValueError("Invalid mask_id")
 
-    def add_format_strip(self):
+    @staticmethod
+    def add_format_strip(matrix, mask_id, eclevel):
         #calculate the format info
-        if self.eclevel not in raw.error_correction_bits or not (0 <= self.mask_id <= 7):
+        if eclevel not in raw.error_correction_bits or not (0 <= mask_id <= 7):
             raise ValueError("Invalid EC level or mask ID")
 
         #error correct the format strip
 
-        ec_bits = raw.error_correction_bits[self.eclevel]
-        mask_bits = f"{self.mask_id:03b}"
+        ec_bits = raw.error_correction_bits[eclevel]
+        mask_bits = f"{mask_id:03b}"
         combined_bits = ec_bits + mask_bits
 
         generator = 0b10100110111  # Generator polynomial
@@ -373,32 +417,34 @@ class QR_Code_String:
         final_format = format_bits ^ mask_pattern
 
         # Convert to 15-bit binary string
-        self.format_strip =  f"{final_format:015b}"
-        ic(self.format_strip)
+        format_strip =  f"{final_format:015b}"
+        ic(format_strip)
 
         #add the error corrected format strip to the QR code
 
-        format_bits = [int(bit) for bit in self.format_strip]
+        format_bits = [int(bit) for bit in format_strip]
 
         #top left
 
         for i in range(6):
-            self.matrix[8, i] = format_bits[i]
+            matrix[8, i] = format_bits[i]
 
-        self.matrix[8, 7] = format_bits[6]
-        self.matrix[8, 8] = format_bits[7]
-        self.matrix[7, 8] = format_bits[8]
+        matrix[8, 7] = format_bits[6]
+        matrix[8, 8] = format_bits[7]
+        matrix[7, 8] = format_bits[8]
 
         for i in range(6):
-            self.matrix[(5-i), 8] = format_bits[9+i]
+            matrix[(5-i), 8] = format_bits[9+i]
 
         #the rest
 
         for i in range(7):
-            self.matrix[-1-i, 8] = format_bits[i]
+            matrix[-1-i, 8] = format_bits[i]
 
         for i in range(8):
-            self.matrix[8, -8+i] = format_bits[7+i]
+            matrix[8, -8+i] = format_bits[7+i]
+
+        return (matrix, format_strip)
 
 
 if __name__ == "__main__":
