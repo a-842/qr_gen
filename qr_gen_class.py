@@ -109,7 +109,7 @@ class QR_Code_String:
 
         ic(self.full_binary)
 
-        self.full_binary = self.calculate_reed_solomon_code2(self.full_binary, self.version, self.eclevel)
+        self.full_binary = self.calculate_reed_solomon_code(self.full_binary, self.version, self.eclevel)
 
         ic(self.full_binary)
         ic(len(self.full_binary))
