@@ -10,6 +10,8 @@ from reedsolo import RSCodec
 
 import qrcode
 
+import copy
+
 
 class QR_Code_String:
 
@@ -40,11 +42,9 @@ class QR_Code_String:
         self.matrix = np.empty((self.size, self.size), dtype=object)
         ic(self.matrix)
 
-        self.build(self.size)
-
     def __repr__(self):
 #▓░
-        mapping = {"1": "█", "0": " ", "i": "█", "o": " ", "f": "f", "v": "v",  }
+        mapping = {"1": "█", "0": " ", "i": "▓", "o": "░", "f": "f", "v": "v",  }
 
         build = ''
         for row in self.matrix:
@@ -56,29 +56,30 @@ class QR_Code_String:
             build += '\n'
         return build
 
-    def build(self, size):
+    def build(self):
         self.encode()
         self.build_string()
 
-        print(self, "\n\n\n\n")
-        self.matrix = self.add_positions(self.matrix, size)
-        print(self, "\n\n\n\n")
-        self.matrix = self.add_padding(self.matrix, size)
-        print(self, "\n\n\n\n")
-        self.matrix = self.add_timing(self.matrix, size)
-        print(self, "\n\n\n\n")
+        self.history.append(copy.deepcopy(self))
+        self.matrix = self.add_positions(self.matrix, self.size)
+        self.history.append(copy.deepcopy(self))
+        self.matrix = self.add_padding(self.matrix, self.size)
+        self.history.append(copy.deepcopy(self))
+        self.matrix = self.add_timing(self.matrix, self.size)
+        self.history.append(copy.deepcopy(self))
         self.matrix = self.add_alignment(self.matrix, self.version)
-        print(self, "\n\n\n\n")
+        self.history.append(copy.deepcopy(self))
         self.matrix = self.add_unchanging_bit(self.matrix, self.version)
-        self.matrix = self.reserve_format_strip(self.matrix, size)
+        self.matrix = self.reserve_format_strip(self.matrix, self.size)
         self.matrix = self.reserve_version_info(self.matrix, self.version)
-        print(self, "\n\n\n\n")
+        self.history.append(copy.deepcopy(self))
         self.matrix = self.place_data(self.matrix, self.size, self.full_binary)
-        print(self, "\n\n\n\n")
+        self.history.append(copy.deepcopy(self))
         self.matrix = self.apply_mask(self.matrix, self.size, self.mask_id)
-        print(self, "\n\n\n\n")
+        self.history.append(copy.deepcopy(self))
         self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
-        print(self, "\n\n\n\n")
+        self.history.append(copy.deepcopy(self))
+        return self.history
 
     def build_string(self):
         # add encoding
@@ -266,10 +267,9 @@ class QR_Code_String:
         upordown = -1 # -1 is up and 1 is down
         currentx = size-1
         currenty = size-1
-        failcount = 0
+
         while len(toadd) > 0:
-            ic(currentx, currenty)
-            ic(len(toadd))
+
             if currenty == -1 or currenty == size:
                 currenty -= upordown
                 currentx -= 2
@@ -280,9 +280,8 @@ class QR_Code_String:
                 matrix[currenty][currentx] = toadd[0]
 
                 toadd = toadd[1:]
-            else:
-                failcount +=1
-                ic(failcount)
+
+
 
             if colomnpart == 1:
                 colomnpart = -1
@@ -306,57 +305,6 @@ class QR_Code_String:
         encoded_data = rs.encode(byte_array)
         return ''.join(f"{byte:08b}" for byte in encoded_data).replace("1", "i").replace("0", "o")
 
-    @staticmethod
-    def calculate_reed_solomon_code2(current_full, version, eclevel):
-        # Get error correction and data information
-        ec_blocks = raw.error_correction_blocks[version][eclevel]  # Parity bytes per block
-        total_data_codewords = raw.byte_counts[version][eclevel]
-        total_codewords = total_data_codewords + ec_blocks
-
-        # Convert the binary string into a list of bytes
-        data_bytes = [
-            int(current_full[i:i + 8], 2) for i in range(0, len(current_full), 8)
-        ]
-
-        # Determine the number of blocks
-        num_blocks = ec_blocks
-        num_data_per_block = total_data_codewords // num_blocks
-        extra_data_blocks = total_data_codewords % num_blocks
-
-        # Split into blocks
-        blocks = []
-        start = 0
-        for i in range(num_blocks):
-            size = num_data_per_block + (1 if i < extra_data_blocks else 0)
-            blocks.append(data_bytes[start:start + size])
-            start += size
-
-        # Generate error correction bytes for each block
-        ec_blocks_bytes = []
-        for block in blocks:
-            rs = RSCodec(len(block))  # Initialize RSCodec with block size
-            ec_bytes = rs.encode(block)[-ec_blocks:]  # Generate parity bytes
-            ec_blocks_bytes.append(ec_bytes)
-
-        # Interleave data and error correction bytes
-        interleaved_data = []
-        max_block_len = max(len(block) for block in blocks)
-
-        # Interleave data bytes
-        for i in range(max_block_len):
-            for block in blocks:
-                if i < len(block):
-                    interleaved_data.append(block[i])
-
-        # Interleave error correction bytes
-        for i in range(ec_blocks):
-            for ec_block in ec_blocks_bytes:
-                if i < len(ec_block):
-                    interleaved_data.append(ec_block[i])
-
-        # Convert interleaved data back to binary string
-        interleaved_binary = ''.join(f'{byte:08b}' for byte in interleaved_data)
-        return interleaved_binary
 
     @staticmethod
     def apply_mask(matrix, size, mask_id):

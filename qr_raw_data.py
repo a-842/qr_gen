@@ -238,5 +238,10 @@ alphanumeric_table = {
         }
 
 
-
+color_mapping = {
+        'i': (200, 200, 200),  # Red
+        'o': (50, 50, 50),  # Green
+        0: (255, 255, 255),    # Blue
+        1: (0, 0, 0), # White
+    }
 
