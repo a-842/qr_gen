@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">QR Code Generator</h1>
+        <form action="/generate" method="post" class="mt-4">
+            <div class="mb-3">
+                <label for="data" class="form-label">Data:</label>
+                <textarea id="data" name="data" class="form-control" rows="3" placeholder="Enter your data here" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="data_type" class="form-label">Data Type:</label>
+                <select id="data_type" name="data_type" class="form-select" required>
+                    <option value="numeric">Numeric</option>
+                    <option value="alphanumeric">Alphanumeric</option>
+                    <option value="bytes">Bytes</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="eclevel" class="form-label">Error Correction Level:</label>
+                <select id="eclevel" name="eclevel" class="form-select" required>
+                    <option value="L">Low (L)</option>
+                    <option value="M">Medium (M)</option>
+                    <option value="Q">Quartile (Q)</option>
+                    <option value="H">High (H)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate QR Code</button>
+        </form>
+
+        {% if output %}
+        <div class="mt-5">
+            <h3>Generated QR Code:</h3>
+            <pre class="bg-light p-3">{{ output }}</pre>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
