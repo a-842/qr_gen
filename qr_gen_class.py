@@ -26,25 +26,29 @@ class QR_Code_String:
         self.binary_data = ''
         self.full_binary = ''
         self.format_strip = ''
+        self.useful = []
 
         self.mask_id = 7
 
         # Initialise matrix size and version
         self.length = len(data)
         ic(self.length)
+        self.useful.append(self.length)
 
         v_list = raw.version_data[data_type][eclevel]
         ic(v_list)
 
         self.version = QR_Code_String.first_largest(v_list, self.length)
         ic(self.version)
+        self.useful.append(self.version)
         self.size = 17 + (self.version * 4)
+        self.useful.append(self.size)
         self.matrix = np.empty((self.size, self.size), dtype=object)
         ic(self.matrix)
 
-    def __repr__(self):
+    def __str__(self):
 #▓░
-        mapping = {"1": "█", "0": " ", "i": "▓", "o": "░", "f": "f", "v": "v",  }
+        mapping = {"1": "█", "0": " ", "i": "█", "o": " ", "f": "f", "v": "v",  }
 
         build = ''
         for row in self.matrix:
@@ -60,26 +64,26 @@ class QR_Code_String:
         self.encode()
         self.build_string()
 
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix = self.add_positions(self.matrix, self.size)
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix = self.add_padding(self.matrix, self.size)
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix = self.add_timing(self.matrix, self.size)
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix = self.add_alignment(self.matrix, self.version)
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix = self.add_unchanging_bit(self.matrix, self.version)
         self.matrix = self.reserve_format_strip(self.matrix, self.size)
         self.matrix = self.reserve_version_info(self.matrix, self.version)
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix = self.place_data(self.matrix, self.size, self.full_binary)
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix = self.apply_mask(self.matrix, self.size, self.mask_id)
-        self.history.append(copy.deepcopy(self))
+        self.history.append(self.matrix)
         self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
-        self.history.append(copy.deepcopy(self))
-        return self.history
+        self.history.append(self.matrix)
+        return
 
     def build_string(self):
         # add encoding
