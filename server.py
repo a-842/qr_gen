@@ -10,24 +10,20 @@ def index():
     # Render the main page with a form for user input
     return render_template('index.html')
 
-@app.route('/input', methods=['POST'])
-def generate_qr():
-    # Get data from the form submission
-        data_type = request.form['data_type']
-        data = request.form['data']
-        eclevel = request.form['eclevel']
-    #save the user input in the session
-        session["data_type"] = data_type
-        session["data"] = data
-        session["eclevel"] = ecevel
+@app.route('/input')
+def take_input():
+
+        return render_template('input.html')
 
 
-@app.route('/result')
+
+@app.route('/result', methods=["post"])
 def result():
-    # Retrieve the QR code or error from the session
-    data_type = session.get("data_type")
-    data = session.get("data")
-    eclevel = session.get("eclevel")
+    # Get data from the form submission
+    data_type = request.form['data_type']
+    data = request.form['data']
+    eclevel = request.form['eclevel']
+
 
     # Create a QR_Code_String instance
     qr = QR_Code_String(data_type, data, eclevel)
@@ -35,10 +31,18 @@ def result():
 
 
     return render_template('result.html', 
-                           encoding_type=qr.encoding,
+                           encoding_type=qr.data_type,
                            length=qr.length,
                            eclevel=qr.eclevel,
                            version=qr.version,
+                           length_code=qr.message_length_binary,
+                           encoding_code=qr.encoding_code,
+                           encoded_data=qr.binary_data,
+                           padding_needed=qr.padding_needed,
+                           full_binary=qr.full_binary,
+                           imgs=qr.history,
+
+                           i='image palceholder'
                            
     
                           )

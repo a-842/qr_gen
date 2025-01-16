@@ -1,10 +1,274 @@
 {% extends 'base.html' %}
 
 {% block body %}
-    <h1>QR Code Result</h1>
-    {% if qr_output %}
-        <img src="data:image/png;base64,{{ qr_output }}" alt="QR Code">
-    {% else %}
-        <p>No QR code generated or error occurred.</p>
-    {% endif %}
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>QR Code Version</h3>
+	<div class="infobox">
+		<p>
+			To make a QR code with <b>{{encoding_type}}</b> encoding, that can hold <b>{{length}}</b> characters of data at a <b>{{eclevel}}</b> level of error correction, we need to use a version <b>{{version}}</b> QRcode.
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Position Patterns</h3>
+	<div class="infobox">
+		<p>
+			These are the same size and in the same place on every QR Code, they identify it as a QR Code and show the orientation.
+		</p>
+	</div>
+	<div class=”l_preview”>
+		<b>{{imgs[0]}}</b>
+	</div>	
+
+
+</div>
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Add padding</h3>
+	<div class="infobox">
+		<p>
+			This is space around the position patterns to make them visually distinct.
+		</p>
+	</div>
+	<div class=”r_preview”>
+		<b>{{imgs[1]}}</b>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Timing Strips</h3>
+	<div class="infobox">
+		<p>
+			A zebra crossing structure spaning between the position patterns. For small codes this tells the reader what version the QR code is.
+		</p>
+	</div>
+	<div class=”l_preview”>
+		{{imgs[2]}}
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Alignment Patterns</h3>
+	<div class="infobox">
+		<p>
+			These appear in all qr codes above version one and are standardised, the indexes the are placed here on indexes <b>{{alignment_indexes}}</b>
+		</p>
+	</div>
+	<div class=”r_preview”>
+		<b>{{i}}</b>
+	</div>	
+
+
+</div>
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Reserve Format Strip</h3>
+	<div class="infobox">
+		<p>
+			This is to make sure we don't add data to where the format info needs to go, here the are is marked in green 
+		</p>
+	</div>
+	<div class=”l_preview”>
+		<b>{{i}}</b>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Unchanging bit</h3>
+	<div class="infobox">
+		<p>
+			This bit has no computational significance but the inventor of the qr code decided it would be a 1
+		</p>
+	</div>
+	<div class=”r_preview”>
+		<b>{{i}}</b>
+	</div>	
+
+
+</div>
+
+<h2>Building the Data string</h2>
+<div class="infobox">
+	Now we will build up a string that will then be added to the qe code in one go
+</div>
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Encoding</h3>
+	<div class="infobox">
+		<p>
+			This QR code is using <b>{{encoding_type}}</b> encoding, and this is represented as <b>{{encoding_code}}</b>
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Message Length</h3>
+	<div class="infobox">
+		<p>
+			This data is <b>{{length}}</b> charaters long, and this is encoded as <b>{{length_code}}</b>
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Your Data</h3>
+	<div class="infobox">
+		<p>
+			Your data encoded into binary is <b>{{encoded_data}}</b>
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>EoM Indicator</h3>
+	<div class="infobox">
+		<p>
+			Now we add the end of message indicator "0000"
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Padding</h3>
+	<div class="infobox">
+		<p>
+			At this point, the string must be a multiple of 8 long. Here we need to add <b>{{padding_needed}}</b> 0s
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Filler Data</h3>
+	<div class="infobox">
+		<p>
+			Here we check against a table to  see how much extra space there is before we start the error correction, if there is extra space, we add '11101100' then '00010001' repeatedly until there is enough
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Error Correction</h3>
+	<div class="infobox">
+		<p>
+			Now we use Reed Solomon error correction on the string so far to get <b>{{full_binary}}</b>. This process is too complex to explain here but you can see the algorithm <a href="/help/rsec">here</a>
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Place Data</h3>
+	<div class="infobox">
+		<p>
+			Place the data in the QR
+		</p>
+	</div>
+	<div class=”r_preview”>
+		<b>{{i}}</b>
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3></h3>
+	<div class="infobox">
+		<p>
+			
+		</p>
+	</div>
+	<div class=”l_preview”>
+		<b>{{i}}</b>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3></h3>
+	<div class="infobox">
+		<p>
+			
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
 {% endblock %}
+
