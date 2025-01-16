@@ -175,20 +175,13 @@ class QR_Code_String:
 
         pattern = raw.position_pattern
 
-        # Add to the top-left corner
+       
         for i in range(7):
             for j in range(7):
-                matrix[i][j] = pattern[i][j]
+                matrix[i][j] = pattern[i][j] # Add to the top-left corner
+                matrix[i][size - 7 + j] = pattern[i][j] # Add to the top-right corner
+                matrix[size - 7 + i][j] = pattern[i][j] # Add to the bottom-left corner
 
-        # Add to the top-right corner
-        for i in range(7):
-            for j in range(7):
-                matrix[i][size - 7 + j] = pattern[i][j]
-
-        # Add to the bottom-left corner
-        for i in range(7):
-            for j in range(7):
-                matrix[size - 7 + i][j] = pattern[i][j]
         return matrix
 
     @staticmethod
