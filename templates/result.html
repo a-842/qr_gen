@@ -26,8 +26,10 @@
 		</p>
 	</div>
 	<div class=”l_preview”>
-		<b>{{imgs[0]}}</b>
-	</div>	
+
+        <img src="{{ url_for('serve_image', index=0) }}">
+
+	</div>
 
 
 </div>
@@ -41,7 +43,7 @@
 		</p>
 	</div>
 	<div class=”r_preview”>
-		<b>{{imgs[1]}}</b>
+		<img src="{{ url_for('serve_image', index=1) }}">
 	</div>	
 
 
@@ -57,7 +59,7 @@
 		</p>
 	</div>
 	<div class=”l_preview”>
-		{{imgs[2]}}
+		<img src="{{ url_for('serve_image', index=2) }}">
 	</div>	
 
 
@@ -70,16 +72,30 @@
 			<h3>Alignment Patterns</h3>
 	<div class="infobox">
 		<p>
-			These appear in all qr codes above version one and are standardised, the indexes the are placed here on indexes <b>{{alignment_indexes}}</b>
+			These appear in all qr codes above version one and are standardised, {% if version == 1 %}<b>this is a version 1 QR code so we don't add anything</b>{% else %}here the indexes are placed here on indexes <b>{{alignment_indexes}}</b>{% endif %}
 		</p>
 	</div>
 	<div class=”r_preview”>
-		<b>{{i}}</b>
+		<img src="{{ url_for('serve_image', index=3) }}">
 	</div>	
 
 
 </div>
 
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Unchanging bit</h3>
+	<div class="infobox">
+		<p>
+			This bit has no computational significance but the inventor of the qr code decided it would be a 1
+		</p>
+	</div>
+	<div class=”r_preview”>
+		<img src="{{ url_for('serve_image', index=4) }}">
+	</div>
+
+
+</div>
 
 <div class=”slice”>
 	<div class=”info”>
@@ -90,27 +106,14 @@
 		</p>
 	</div>
 	<div class=”l_preview”>
-		<b>{{i}}</b>
+		<img src="{{ url_for('serve_image', index=5) }}">
 	</div>	
 
 
 </div>
 
 	
-<div class=”slice”>
-	<div class=”info”>
-			<h3>Unchanging bit</h3>
-	<div class="infobox">
-		<p>
-			This bit has no computational significance but the inventor of the qr code decided it would be a 1
-		</p>
-	</div>
-	<div class=”r_preview”>
-		<b>{{i}}</b>
-	</div>	
 
-
-</div>
 
 <h2>Building the Data string</h2>
 <div class="infobox">
@@ -232,7 +235,7 @@
 		</p>
 	</div>
 	<div class=”r_preview”>
-		<b>{{i}}</b>
+		<b><img src="{{ url_for('serve_image', index=6) }}"></b>
 	</div>	
 
 
@@ -241,18 +244,11 @@
 
 
 <div class=”slice”>
-	<div class=”info”>
-			<h3></h3>
-	<div class="infobox">
-		<p>
-			
-		</p>
+	<h3>Calculate Mask</h3>
+	<p>To make the QR code easier to read we apply a mask to all of the data bits, to work out whick one to apply, we evaluate each mask using a series of rules as shown <a href="/help/masks">here</a></p>
+	<div class="mask_array">
+		d
 	</div>
-	<div class=”l_preview”>
-		<b>{{i}}</b>
-	</div>	
-
-
 </div>
 
 	
@@ -266,6 +262,38 @@
 	</div>
 	<div class=”r_preview”>
 	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3></h3>
+	<div class="infobox">
+		<p>
+
+		</p>
+	</div>
+	<div class=”l_preview”>
+		<b>{{i}}</b>
+	</div>
+
+
+</div>
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3></h3>
+	<div class="infobox">
+		<p>
+
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>
 
 
 </div>

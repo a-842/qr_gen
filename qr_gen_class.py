@@ -12,6 +12,7 @@ from reedsolo import RSCodec
 class QR_Code_String:
 
     def __init__(self, data_type, data, eclevel):
+        self.masks = []
         self.data_type = data_type
         self.data = data
         self.eclevel = eclevel
@@ -60,8 +61,12 @@ class QR_Code_String:
         st = ""
         for row in self.matrix:
             for bit in row:
+                if bit is None:
+                    st += "-"
+                else:
+                    st += str(bit)
 
-                st += str(bit)
+            st += "\n"
         return  st
 
 
@@ -85,11 +90,11 @@ class QR_Code_String:
         self.history.append(str(self))
         self.matrix = self.place_data(self.matrix, self.size, self.full_binary)
         self.history.append(str(self))
-        self.matrix = self.apply_mask(self.matrix, self.size, self.mask_id)
+        self.matrix = self.apply_mask(self.matrix, self.size)
         self.history.append(str(self))
         self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
         self.history.append(str(self))
-        return
+        print(self.matrix)
 
     def build_string(self):
         # add encoding
@@ -309,9 +314,105 @@ class QR_Code_String:
         encoded_data = rs.encode(byte_array)
         return ''.join(f"{byte:08b}" for byte in encoded_data).replace("1", "i").replace("0", "o")
 
+    @staticmethod
+    def evaluate_mask(array):
+        array = np.array([[0 if x in ['o', 0] else 1 for x in row] for row in array])
+        # Rule 1: Find consecutive rows or columns of same color
+        def penalty_rule_1(arr):
+            penalty = 0
+            # Check rows
+            for row in arr:
+                penalty += count_consecutive(row)
+            # Check columns
+            for col in arr.T:
+                penalty += count_consecutive(col)
+            return penalty
+
+        def count_consecutive(line):
+            count = 1
+            penalty = 0
+            for i in range(1, len(line)):
+                if line[i] == line[i - 1] and line[i] in [0, 1]:  # Check only binary values
+                    count += 1
+                else:
+                    if count >= 5:
+                        penalty += 3 + (count - 5)
+                    count = 1
+            # Check if the last segment has a penalty
+            if count >= 5:
+                penalty += 3 + (count - 5)
+            return penalty
+
+        # Rule 2: Check 2x2 blocks of same color
+        def penalty_rule_2(arr):
+            penalty = 0
+            for y in range(arr.shape[0] - 1):
+                for x in range(arr.shape[1] - 1):
+                    block = arr[y:y + 2, x:x + 2]
+                    if np.all(block == 0) or np.all(block == 1):  # Only binary values
+                        penalty += 3
+            return penalty
+
+        # Rule 3: Patterns like 1011101 in rows or columns
+        def penalty_rule_3(arr):
+            penalty = 0
+            pattern = [1, 0, 1, 1, 1, 0, 1]
+            rev_pattern = pattern[::-1]
+
+            # Check rows
+            for row in arr:
+                penalty += count_pattern(row, pattern)
+                penalty += count_pattern(row, rev_pattern)
+
+            # Check columns
+            for col in arr.T:
+                penalty += count_pattern(col, pattern)
+                penalty += count_pattern(col, rev_pattern)
+
+            return penalty
+
+        def count_pattern(line, pattern):
+            penalty = 0
+            for i in range(len(line) - len(pattern) + 1):
+                if list(line[i:i + len(pattern)]) == pattern:
+                    penalty += 40
+            return penalty
+
+        # Rule 4: Balance of black and white pixels
+        def penalty_rule_4(arr):
+            total_pixels = arr.size
+            black_pixels = np.sum(arr == 1)
+            percent_black = (black_pixels / total_pixels) * 100
+            prev_multiple_5 = int(percent_black // 5) * 5
+            next_multiple_5 = prev_multiple_5 + 5
+            return min(abs(prev_multiple_5 - 50), abs(next_multiple_5 - 50)) * 10
+
+        # Apply rules to the binary part of the matrix
+        binary_array = np.array([[0 if x == 'o' else 1 if x == 'i' else x for x in row] for row in array])
+
+        total_penalty = (
+                penalty_rule_1(binary_array) +
+                penalty_rule_2(binary_array) +
+                penalty_rule_3(binary_array) +
+                penalty_rule_4(binary_array)
+        )
+
+        return total_penalty
+
+
+    def apply_mask(self, matrix, size):
+        self.masks = []
+        for i in range(8):
+            attempt = self.attempt_mask(matrix, size, i)
+            attempt_penalty = self.evaluate_mask(attempt)
+            self.masks.append((attempt, attempt_penalty))
+        ic(self.masks)
+
+        return self.matrix
+
 
     @staticmethod
-    def apply_mask(matrix, size, mask_id):
+    def attempt_mask(matrix, size, mask_id):
         for i in range(size):
             for j in range(size):
                 if matrix[i][j] == "i":
@@ -396,20 +497,9 @@ class QR_Code_String:
         for i in range(8):
             matrix[8, -8+i] = format_bits[7+i]
 
-        return (matrix, format_strip)
+        return matrix, format_strip
 
-    
-    def get_string(self):
-        b_string = ""
-        for row in self.matrix:
-            for cell in row:
-                if cell in ("i", 1):  # Treat "i" or 1 as binary 1
-                    b_string += "1"
-                elif cell in ("o", 0):  # Treat "o" or 0 as binary 0
-                    b_string += "0"
-                else:
-                    b_string += "0"  # Default to 0 for any None or placeholders
-        return b_string
+
 
 
 if __name__ == "__main__":
