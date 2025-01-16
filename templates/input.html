@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+
+{% block head %}
+
+
+
+{% endblock %}
+
+
+{% block body %}
+    <form action="/generate" method="post">
+        <label for="data">Data:</label>
+        <textarea id="data" name="data" rows="3" required></textarea>
+
+        <label for="data_type">Data Type:</label>
+        <select id="data_type" name="data_type" required>
+            <option value="numeric">Numeric</option>
+            <option value="alphanumeric">Alphanumeric</option>
+            <option value="bytes">Bytes</option>
+        </select>
+
+        <label for="eclevel">Error Correction Level:</label>
+        <select id="eclevel" name="eclevel" required>
+            <option value="L">Low (L)</option>
+            <option value="M">Medium (M)</option>
+            <option value="Q">Quartile (Q)</option>
+            <option value="H">High (H)</option>
+        </select>
+
+        <button type="submit">Generate QR Code</button>
+    </form>
+
+{% endblock %}
