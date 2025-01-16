@@ -8,41 +8,54 @@ app.secret_key = 'thgis is a very secret key that nobody could ever guess'  # Re
 @app.route('/')
 def index():
     # Render the main page with a form for user input
-    return render_template('input.html')
+    return render_template('index.html')
 
-@app.route('/generate', methods=['POST'])
+@app.route('/input', methods=['POST'])
 def generate_qr():
-    try:
-        # Get data from the form submission
+    # Get data from the form submission
         data_type = request.form['data_type']
         data = request.form['data']
         eclevel = request.form['eclevel']
+    #save the user input in the session
+        session["data_type"] = data_type
+        session["data"] = data
+        session["eclevel"] = ecevel
 
-        # Create a QR_Code_String instance
-        qr = QR_Code_String(data_type, data, eclevel)
-        qr.build()  # Generate the QR code
-
-        # Generate the QR code image (assuming it's a PIL image)
-        qr_image = qr.get_string()  # Ensure you have a method to get the image
-
-        # Store the result in the session to pass it to the results page
-        session['qr_image'] = qr_image
-        session['error'] = None
-
-        # Redirect to the result page
-        return redirect(url_for('result'))
-    except Exception as e:
-        # Store the error in the session and redirect to the results page
-        session['error'] = str(e)
-        session['qr_object'] = None
-        return redirect(url_for('result'))
 
 @app.route('/result')
 def result():
     # Retrieve the QR code or error from the session
-    qr_object = session.get('qr_object')
-    error = session.get('error')
-    return render_template('result.html', qr_output=str(qr_object))
+    data_type = session.get("data_type")
+    data = session.get("data")
+    eclevel = session.get("eclevel")
+
+    # Create a QR_Code_String instance
+    qr = QR_Code_String(data_type, data, eclevel)
+    qr.build()  # Generate the QR code
+
+
+    return render_template('result.html', 
+                           encoding_type=qr.encoding,
+                           length=qr.length,
+                           eclevel=qr.eclevel,
+                           version=qr.version,
+                           
+    
+                          )
 
 if __name__ == "__main__":
     app.run(debug=True, port=5005)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
