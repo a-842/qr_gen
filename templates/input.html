@@ -1,15 +1,8 @@
-{% extends "base.html" %}
-
-
-{% block head %}
-
-
-
-{% endblock %}
-
+{% extends 'base.html' %}
 
 {% block body %}
-    <form action="/generate" method="post">
+
+<form action="/result" method="post">
         <label for="data">Data:</label>
         <textarea id="data" name="data" rows="3" required></textarea>
 

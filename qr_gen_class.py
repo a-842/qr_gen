@@ -8,10 +8,6 @@ import numpy as np
 
 from reedsolo import RSCodec
 
-import qrcode
-
-import copy
-
 
 class QR_Code_String:
 
@@ -46,7 +42,7 @@ class QR_Code_String:
         self.matrix = np.empty((self.size, self.size), dtype=object)
         ic(self.matrix)
 
-    def __str__(self):
+    def __repr__(self):
 #▓░
         mapping = {"1": "█", "0": " ", "i": "█", "o": " ", "f": "f", "v": "v",  }
 
@@ -60,46 +56,57 @@ class QR_Code_String:
             build += '\n'
         return build
 
+    def __str__(self):
+        st = ""
+        for row in self.matrix:
+            for bit in row:
+
+                st += str(bit)
+        return  st
+
+
     def build(self):
         self.encode()
         self.build_string()
 
-        self.history.append(self.matrix)
+
         self.matrix = self.add_positions(self.matrix, self.size)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         self.matrix = self.add_padding(self.matrix, self.size)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         self.matrix = self.add_timing(self.matrix, self.size)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         self.matrix = self.add_alignment(self.matrix, self.version)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         self.matrix = self.add_unchanging_bit(self.matrix, self.version)
+        self.history.append(str(self))
         self.matrix = self.reserve_format_strip(self.matrix, self.size)
         self.matrix = self.reserve_version_info(self.matrix, self.version)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         self.matrix = self.place_data(self.matrix, self.size, self.full_binary)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         self.matrix = self.apply_mask(self.matrix, self.size, self.mask_id)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
-        self.history.append(self.matrix)
+        self.history.append(str(self))
         return
 
     def build_string(self):
         # add encoding
-        self.full_binary += raw.encodings[self.data_type]
+        self.encoding_code = raw.encodings[self.data_type]
+        self.full_binary += self.encoding_code
         # add message length
-        message_length_binary = bin(self.length)[2:].zfill(8)
-        ic(message_length_binary)
-        self.full_binary += message_length_binary
+        self.message_length_binary = bin(self.length)[2:].zfill(8)
+        ic(self.message_length_binary)
+        self.full_binary += self.message_length_binary
         # add actual data
         self.full_binary += self.binary_data
         # add terminator
         self.full_binary += "0000"
         # add padding
-        padding_needed = (8 - len(self.full_binary) % 8) % 8
-        ic(padding_needed)
-        self.full_binary += "0" * padding_needed
+        self.padding_needed = (8 - len(self.full_binary) % 8) % 8
+        ic(self.padding_needed)
+        self.full_binary += "0" * self.padding_needed
         ic(self.full_binary)
         # add excess bytes
         bytes_needed = raw.byte_counts[self.version][self.eclevel]
