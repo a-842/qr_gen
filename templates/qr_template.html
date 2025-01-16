@@ -1,0 +1,266 @@
+<div class=”slice”>
+	<div class=”info”>
+			<h3>QR Code Version</h3>
+	<div class="infobox">
+		<p>
+			To make a QR code with {{encoding type}} encoding, that can hold {{length}} characters of data at a {{eclevel}} level of error correction, we need to use a version {{version}} qrcode. 
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Position Patterns</h3>
+	<div class="infobox">
+		<p>
+			These are the same size and in the same palce on every QR Code, they identify it as a QR Code and show the orientation.
+		</p>
+	</div>
+	<div class=”l_preview”>
+		{{}}
+	</div>	
+
+
+</div>
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Add padding</h3>
+	<div class="infobox">
+		<p>
+			This is space around the position patterns to make them visually distinct.
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Timing Strips</h3>
+	<div class="infobox">
+		<p>
+			A zebra crossing structure spanig between the position patterns. For small codes this tells the reader what version it is.
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Alignment Patterns</h3>
+	<div class="infobox">
+		<p>
+			These appear in all qr codes above version one and are standardised, the indexes the are placed here on indexes {{alignment_indexes}}
+		</p>
+	</div>
+	<div class=”r_preview”>
+		{{}}
+	</div>	
+
+
+</div>
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Reserve Format Strip</h3>
+	<div class="infobox">
+		<p>
+			This is to make sure we don't add data to where the format info needs to go, here the are is marked in green 
+		</p>
+	</div>
+	<div class=”l_preview”>
+		{{}}
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Unchanging bit</h3>
+	<div class="infobox">
+		<p>
+			This bit has no compitational significance but the inventor of the qr code ddecided it would be a 1
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+<h2>Building the Data string</h2>
+<div class="infobox">
+	Now we will build up a string that will then be added to the qe code in one go
+</div>
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Encoding</h3>
+	<div class="infobox">
+		<p>
+			This QR code is using {{encoding}} encoding, and this is represented as {{encoding_code}}
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Message Length</h3>
+	<div class="infobox">
+		<p>
+			This data is {{length}} charaters long, and this is encoded as {{length_code}}
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Your Data</h3>
+	<div class="infobox">
+		<p>
+			Your data encoded into binary is {{encoded_data}}
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>EoM Indicator</h3>
+	<div class="infobox">
+		<p>
+			Now we add the end of message indicator "0000"
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Padding</h3>
+	<div class="infobox">
+		<p>
+			At this point, the string must be a multiple of 8 long. Here we need to add {{padding_needed}} 0s
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Filler Data</h3>
+	<div class="infobox">
+		<p>
+			Here we check against a table to  see how much extra space there is before we start the error correction, if there is extra space, we add '11101100' then '00010001' repeatedly until there is enough
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Error Correcrion</h3>
+	<div class="infobox">
+		<p>
+			Now we use Reed Solomon error correction on the string so far to get {{full_binary}}. This process is too complex to explain here but you can see the algorithm <a href="/help/rsec">here</a>
+		</p>
+	</div>
+	<div class=”l_preview”>
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3>Place Data</h3>
+	<div class="infobox">
+		<p>
+			Place the data ib the QR 
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+
+
+<div class=”slice”>
+	<div class=”info”>
+			<h3></h3>
+	<div class="infobox">
+		<p>
+			
+		</p>
+	</div>
+	<div class=”l_preview”>
+		{{}}
+	</div>	
+
+
+</div>
+
+	
+<div class=”slice”>
+	<div class=”info”>
+			<h3></h3>
+	<div class="infobox">
+		<p>
+			
+		</p>
+	</div>
+	<div class=”r_preview”>
+	</div>	
+
+
+</div>
+
+
+
