@@ -398,9 +398,22 @@ class QR_Code_String:
 
         return (matrix, format_strip)
 
+    
+    def get_string(self):
+        b_string = ""
+        for row in self.matrix:
+            for cell in row:
+                if cell in ("i", 1):  # Treat "i" or 1 as binary 1
+                    b_string += "1"
+                elif cell in ("o", 0):  # Treat "o" or 0 as binary 0
+                    b_string += "0"
+                else:
+                    b_string += "0"  # Default to 0 for any None or placeholders
+        return b_string
+
 
 if __name__ == "__main__":
-    import qr_gen_tester
+    import server
 
 
 

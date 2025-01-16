@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from qr_gen_class import QR_Code_String
+from icecream import ic
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Required for session management
+app.secret_key = 'thgis is a very secret key that nobody could ever guess'  # Required for session management
 
 @app.route('/')
 def index():
@@ -19,14 +20,13 @@ def generate_qr():
 
         # Create a QR_Code_String instance
         qr = QR_Code_String(data_type, data, eclevel)
-        qr_history = qr.build()  # Generate the QR code
+        qr.build()  # Generate the QR code
 
-        # Convert the QR code matrix into a displayable format
-        qr_output = repr(qr)
+        # Generate the QR code image (assuming it's a PIL image)
+        qr_image = qr.get_string()  # Ensure you have a method to get the image
 
         # Store the result in the session to pass it to the results page
-
-        session['qr_object'] = qr
+        session['qr_image'] = qr_image
         session['error'] = None
 
         # Redirect to the result page
