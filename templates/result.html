@@ -5,11 +5,13 @@
 <div class=”slice”>
 	<div class=”info”>
 			<h3>QR Code Version</h3>
-	<div class="infobox">
-		<p>
-			To make a QR code with <b>{{encoding_type}}</b> encoding, that can hold <b>{{length}}</b> characters of data at a <b>{{eclevel}}</b> level of error correction, we need to use a version <b>{{version}}</b> QRcode.
-		</p>
+		<div class="infobox">
+			<p>
+				To make a QR code with <b>{{encoding_type}}</b> encoding, that can hold <b>{{length}}</b> characters of data at a <b>{{eclevel}}</b> level of error correction, we need to use a version <b>{{version}}</b> QRcode.
+			</p>
+		</div>
 	</div>
+
 	<div class=”r_preview”>
 	</div>	
 
@@ -22,12 +24,13 @@
 			<h3>Position Patterns</h3>
 	<div class="infobox">
 		<p>
-			These are the same size and in the same place on every QR Code, they identify it as a QR Code and show the orientation.
+			These are the same size and in the same place on every QR Code. They identify it as a QR Code and show the orientation.
 		</p>
+	</div>
 	</div>
 	<div class=”l_preview”>
 
-        <img src="{{ url_for('serve_image', index=0) }}">
+        <img src="{{ url_for('serve_image', image_index=0) }}">
 
 	</div>
 
@@ -42,8 +45,9 @@
 			This is space around the position patterns to make them visually distinct.
 		</p>
 	</div>
+	</div>
 	<div class=”r_preview”>
-		<img src="{{ url_for('serve_image', index=1) }}">
+		<img src="{{ url_for('serve_image', image_index=1) }}">
 	</div>	
 
 
@@ -58,8 +62,9 @@
 			A zebra crossing structure spaning between the position patterns. For small codes this tells the reader what version the QR code is.
 		</p>
 	</div>
+		</div>
 	<div class=”l_preview”>
-		<img src="{{ url_for('serve_image', index=2) }}">
+		<img src="{{ url_for('serve_image', image_index=2) }}">
 	</div>	
 
 
@@ -75,8 +80,9 @@
 			These appear in all qr codes above version one and are standardised, {% if version == 1 %}<b>this is a version 1 QR code so we don't add anything</b>{% else %}here the indexes are placed here on indexes <b>{{alignment_indexes}}</b>{% endif %}
 		</p>
 	</div>
+		</div>
 	<div class=”r_preview”>
-		<img src="{{ url_for('serve_image', index=3) }}">
+		<img src="{{ url_for('serve_image', image_index=3) }}">
 	</div>	
 
 
@@ -90,8 +96,9 @@
 			This bit has no computational significance but the inventor of the qr code decided it would be a 1
 		</p>
 	</div>
+		</div>
 	<div class=”r_preview”>
-		<img src="{{ url_for('serve_image', index=4) }}">
+		<img src="{{ url_for('serve_image', image_index=4) }}">
 	</div>
 
 
@@ -102,11 +109,12 @@
 			<h3>Reserve Format Strip</h3>
 	<div class="infobox">
 		<p>
-			This is to make sure we don't add data to where the format info needs to go, here the are is marked in green 
+			This is to make sure we don't add data to where the format info needs to go, here they are marked in green
 		</p>
 	</div>
+		</div>
 	<div class=”l_preview”>
-		<img src="{{ url_for('serve_image', index=5) }}">
+		<img src="{{ url_for('serve_image', image_index=5) }}">
 	</div>	
 
 
@@ -117,7 +125,7 @@
 
 <h2>Building the Data string</h2>
 <div class="infobox">
-	Now we will build up a string that will then be added to the qe code in one go
+	Now we will build up a string that will then be added to the QR code in one go
 </div>
 	
 <div class=”slice”>
@@ -128,6 +136,7 @@
 			This QR code is using <b>{{encoding_type}}</b> encoding, and this is represented as <b>{{encoding_code}}</b>
 		</p>
 	</div>
+		</div>
 	<div class=”l_preview”>
 	</div>	
 
@@ -143,6 +152,7 @@
 			This data is <b>{{length}}</b> charaters long, and this is encoded as <b>{{length_code}}</b>
 		</p>
 	</div>
+		</div>
 	<div class=”r_preview”>
 	</div>	
 
@@ -156,6 +166,7 @@
 		<p>
 			Your data encoded into binary is <b>{{encoded_data}}</b>
 		</p>
+		</div>
 	</div>
 	<div class=”l_preview”>
 	</div>	
@@ -171,6 +182,7 @@
 		<p>
 			Now we add the end of message indicator "0000"
 		</p>
+		</div>
 	</div>
 	<div class=”r_preview”>
 	</div>	
@@ -185,9 +197,10 @@
 			<h3>Padding</h3>
 	<div class="infobox">
 		<p>
-			At this point, the string must be a multiple of 8 long. Here we need to add <b>{{padding_needed}}</b> 0s
+			At this point, the string must be a multiple of 8 long. Here we need to add <b>{{padding_needed}}</b> zeros.
 		</p>
 	</div>
+		</div>
 	<div class=”l_preview”>
 	</div>	
 
@@ -203,6 +216,7 @@
 			Here we check against a table to  see how much extra space there is before we start the error correction, if there is extra space, we add '11101100' then '00010001' repeatedly until there is enough
 		</p>
 	</div>
+		</div>
 	<div class=”r_preview”>
 	</div>	
 
@@ -216,9 +230,10 @@
 			<h3>Error Correction</h3>
 	<div class="infobox">
 		<p>
-			Now we use Reed Solomon error correction on the string so far to get <b>{{full_binary}}</b>. This process is too complex to explain here but you can see the algorithm <a href="/help/rsec">here</a>
+			Now we use Reed Solomon error correction on the string so far to get <b>{{full_binary}}</b>. This process is too complex to summarise but you can see the algorithm <a href="/help/rsec">here</a>
 		</p>
 	</div>
+		</div>
 	<div class=”l_preview”>
 	</div>	
 
@@ -234,8 +249,9 @@
 			Place the data in the QR
 		</p>
 	</div>
+		</div>
 	<div class=”r_preview”>
-		<b><img src="{{ url_for('serve_image', index=6) }}"></b>
+		<img src="{{ url_for('serve_image', image_index=6) }}">
 	</div>	
 
 
@@ -247,8 +263,14 @@
 	<h3>Calculate Mask</h3>
 	<p>To make the QR code easier to read we apply a mask to all of the data bits, to work out whick one to apply, we evaluate each mask using a series of rules as shown <a href="/help/masks">here</a></p>
 	<div class="mask_array">
-		d
+		{% for item in [7, 8, 9, 10, 11, 12, 13, 14	] %}
+		<div class="mask_item">
+		<img src="{{ url_for('serve_image', image_index=item) }}">
+		{{ eval_list[loop.index-1] }}
+		</div>
+		{% endfor %}
 	</div>
+
 </div>
 
 	

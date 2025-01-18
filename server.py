@@ -1,11 +1,15 @@
-from flask import Flask, render_template, request, Response, session
+from flask import Flask, render_template, request, Response, make_response
 from qr_gen_class import QR_Code_String
 from PIL import Image
 import io
 import base64
+from icecream import ic
 
 app = Flask(__name__)
-app.secret_key = 'this is a very secret key that nobody could ever guess'
+app.secret_key = 'guess'
+
+def split_data(data, chunk_size=4000):
+    return [data[i:i+chunk_size] for i in range(0, len(data), chunk_size)]
 
 def create_image_from_pattern(pattern):
     rows = pattern.strip().split("\n")
@@ -47,15 +51,28 @@ def result():
     qr.build()
 
     # Save images in session for serving later
-    session['images'] = []
+    imagedata = []
     for step in qr.history:
         img = create_image_from_pattern(step)
         img_io = io.BytesIO()
         img.save(img_io, "PNG")
         img_io.seek(0)
-        session['images'].append(base64.b64encode(img_io.getvalue()).decode('utf-8'))
+        imagedata.append(base64.b64encode(img_io.getvalue()).decode('utf-8'))
+    eval_list = []
+    for step in qr.masks:
+        img = create_image_from_pattern(step[0])
+        img_io = io.BytesIO()
 
-    return render_template(
+        img.save(img_io, "PNG")
+        img_io.seek(0)
+        eval_list.append(step[1])
+        imagedata.append(
+
+                base64.b64encode(img_io.getvalue()).decode('utf-8'),
+        )
+    ic(eval_list)
+
+    resp = make_response(render_template(
         'result.html',
         encoding_type=qr.data_type,
         length=qr.length,
@@ -66,15 +83,21 @@ def result():
         encoded_data=qr.binary_data,
         padding_needed=qr.padding_needed,
         full_binary=qr.full_binary,
-        imgs=range(len(session['images']))
-    )
+        eval_list=eval_list,
 
-@app.route('/image/<int:index>')
-def serve_image(index):
-    if 'images' in session and 0 <= index < len(session['images']):
-        img_data = base64.b64decode(session['images'][index])
-        return Response(img_data, mimetype="image/png")
-    return "Image not found", 404
+    ))
+    for idx, image in enumerate(imagedata):
+        ic(image)
+        resp.set_cookie(str(idx), image)
+
+    return resp
+
+@app.route('/image/<int:image_index>')
+def serve_image(image_index):
+    cookie = request.cookies.get(str(image_index))
+    img_data = base64.b64decode(cookie)
+    return Response(img_data, mimetype="image/png")
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5005)
