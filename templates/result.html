@@ -2,6 +2,11 @@
 
 {% block body %}
 
+{% for item in range(17) %}
+		<img src="{{ url_for('serve_image', image_index=item) }}">
+
+		{% endfor %}
+
 <div class=”slice”>
 	<div class=”info”>
 			<h3>QR Code Version</h3>
@@ -276,13 +281,15 @@
 	
 <div class=”slice”>
 	<div class=”info”>
-			<h3></h3>
+			<h3>Choose Mask</h3>
 	<div class="infobox">
 		<p>
-			
+			The Mask with the lowest penalty is mask {{ mask_id+1 }} so we apply it to the QR Code
 		</p>
 	</div>
+	</div>
 	<div class=”r_preview”>
+		<img src="{{ url_for('serve_image', image_index=15) }}">
 	</div>	
 
 

@@ -105,9 +105,11 @@ class QR_Code_String:
         self.history.append(str(self))
         self.matrix = self.apply_mask(self.matrix, self.size)
         self.history.append(str(self))
-        #self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
+        ic(self.history)
+        self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
         self.history.append(str(self))
-        print(self.matrix)
+        ic(self.history)
+
 
     def build_string(self):
         # add encoding
@@ -419,7 +421,6 @@ class QR_Code_String:
             attempt = self.attempt_mask(matrix, size, i)
             attempt_penalty = self.evaluate_mask(attempt)
             self.masks.append((QR_Code_String.string(attempt), attempt_penalty))
-        ic(self.masks)
 
         def get_key(idx):
             return self.masks[idx][1]
@@ -429,11 +430,11 @@ class QR_Code_String:
         best_mask_string = self.masks[best_mask_index][0]
 
         best_mask_matrix = [
-            [None if char == '0' else 1 if char == '1' else None for char in best_mask_string[i * size:(i + 1) * size]]
+            [0 if char in ("o", 0) else 1 if char in ("i", 1) else "f" if char == "f" else None for char in best_mask_string[i * size:(i + 1) * size]]
             for i in range(size)
         ]
         self.mask_id = best_mask_index
-        return best_mask_matrix
+        return np.array([[0 if x == 'o' else 1 if x == 'i' else x for x in row] for row in best_mask_matrix])
 
 
     @staticmethod

@@ -84,6 +84,8 @@ def result():
         padding_needed=qr.padding_needed,
         full_binary=qr.full_binary,
         eval_list=eval_list,
+        mask_id=qr.mask_id,
+
 
     ))
     for idx, image in enumerate(imagedata):
