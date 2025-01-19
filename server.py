@@ -31,7 +31,7 @@ def create_image_from_pattern(pattern):
                 pixels[x, y] = (187, 187, 187)
             elif char == 'f':
                 pixels[x, y] = (0,255,0)
-    return image
+    return image#.resize((200, 200),resample=Image.BOX)
 
 @app.route('/')
 def index():
@@ -55,7 +55,7 @@ def result():
     for step in qr.history:
         img = create_image_from_pattern(step)
         img_io = io.BytesIO()
-        img.save(img_io, "PNG")
+        img.save(img_io, "WEBP")
         img_io.seek(0)
         imagedata.append(base64.b64encode(img_io.getvalue()).decode('utf-8'))
     eval_list = []
@@ -63,7 +63,7 @@ def result():
         img = create_image_from_pattern(step[0])
         img_io = io.BytesIO()
 
-        img.save(img_io, "PNG")
+        img.save(img_io, "WEBP")
         img_io.seek(0)
         eval_list.append(step[1])
         imagedata.append(
@@ -85,6 +85,8 @@ def result():
         full_binary=qr.full_binary,
         eval_list=eval_list,
         mask_id=qr.mask_id,
+        format_strip_combined_bits=qr.format_strip_combined_bits,
+        format_strip=qr.format_strip,
 
 
     ))
@@ -97,8 +99,8 @@ def result():
 @app.route('/image/<int:image_index>')
 def serve_image(image_index):
     cookie = request.cookies.get(str(image_index))
-    img_data = base64.b64decode(cookie)
-    return Response(img_data, mimetype="image/png")
+    img_data = base64.b64decode(cookie)#.resize((200, 200),resample=Image.BOX)
+    return Response(img_data, mimetype="image/WEBP")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+{% for item in range(17) %}
+		<img src="{{ url_for('serve_image', image_index=item) }}">
+
+{% endfor %}
+
+<p>Encoding Type: {{ encoding_type }}</p>
+    <p>Length: {{ length }}</p>
+    <p>Error Correction Level: {{ eclevel }}</p>
+    <p>Version: {{ version }}</p>
+    <p>Length Code: {{ length_code }}</p>
+    <p>Encoding Code: {{ encoding_code }}</p>
+    <p>Encoded Data: {{ encoded_data }}</p>
+    <p>Padding Needed: {{ padding_needed }}</p>
+    <p>Full Binary: {{ full_binary }}</p>
+    <p>Evaluation List: {{ eval_list }}</p>
+    <p>Mask ID: {{ mask_id }}</p>
+    <p>Format Strip 1: {{ format_strip_reserved_bits }}</p>
+    <p>Format Strip 2: {{ format_strip }}</p>
+
+{% endblock %}

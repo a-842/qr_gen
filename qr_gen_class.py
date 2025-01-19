@@ -12,6 +12,7 @@ from reedsolo import RSCodec
 class QR_Code_String:
 
     def __init__(self, data_type, data, eclevel):
+        self.format_strip_combined_bits = ""
         self.masks = []
         self.data_type = data_type
         self.data = data
@@ -101,14 +102,17 @@ class QR_Code_String:
         self.matrix = self.reserve_format_strip(self.matrix, self.size)
         self.matrix = self.reserve_version_info(self.matrix, self.version)
         self.history.append(str(self))
+        ic(self)
         self.matrix = self.place_data(self.matrix, self.size, self.full_binary)
         self.history.append(str(self))
+        ic(self)
         self.matrix = self.apply_mask(self.matrix, self.size)
         self.history.append(str(self))
-        ic(self.history)
-        self.matrix, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
+        ic(self)
+        self.matrix, self.format_strip_combined_bits, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
+        ic(self)
         self.history.append(str(self))
-        ic(self.history)
+
 
 
     def build_string(self):
@@ -428,13 +432,13 @@ class QR_Code_String:
         best_mask_index = min(range(len(self.masks)), key=get_key)
 
         best_mask_string = self.masks[best_mask_index][0]
-
+        ic(best_mask_string)
         best_mask_matrix = [
             [0 if char in ("o", 0) else 1 if char in ("i", 1) else "f" if char == "f" else None for char in best_mask_string[i * size:(i + 1) * size]]
             for i in range(size)
         ]
         self.mask_id = best_mask_index
-        return np.array([[0 if x == 'o' else 1 if x == 'i' else x for x in row] for row in best_mask_matrix])
+        return self.attempt_mask(matrix, size, self.mask_id)
 
 
     @staticmethod
@@ -523,7 +527,7 @@ class QR_Code_String:
         for i in range(8):
             matrix[8, -8+i] = format_bits[7+i]
 
-        return matrix, format_strip
+        return matrix, str(combined_bits), format_strip
 
 
 

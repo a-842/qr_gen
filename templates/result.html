@@ -82,7 +82,7 @@
 			<h3>Alignment Patterns</h3>
 	<div class="infobox">
 		<p>
-			These appear in all qr codes above version one and are standardised, {% if version == 1 %}<b>this is a version 1 QR code so we don't add anything</b>{% else %}here the indexes are placed here on indexes <b>{{alignment_indexes}}</b>{% endif %}
+			These appear in all qr codes above version one and are standardised, {% if version == 1 %}<b>this is a version 1 QR code so we don't add anything</b>{% else %}here the indexes are placed here on indexes <b>{{alignment_indexes}}</b>{% endif %}.
 		</p>
 	</div>
 		</div>
@@ -98,7 +98,7 @@
 			<h3>Unchanging bit</h3>
 	<div class="infobox">
 		<p>
-			This bit has no computational significance but the inventor of the qr code decided it would be a 1
+			This bit has no computational significance but the inventor of the qr code decided it would be a 1.
 		</p>
 	</div>
 		</div>
@@ -114,7 +114,7 @@
 			<h3>Reserve Format Strip</h3>
 	<div class="infobox">
 		<p>
-			This is to make sure we don't add data to where the format info needs to go, here they are marked in green
+			This is to make sure we don't add data to where the format info needs to go, here they are marked in green.
 		</p>
 	</div>
 		</div>
@@ -130,7 +130,7 @@
 
 <h2>Building the Data string</h2>
 <div class="infobox">
-	Now we will build up a string that will then be added to the QR code in one go
+	Now we will build up a string that will then be added to the QR code in one go.
 </div>
 	
 <div class=”slice”>
@@ -138,7 +138,7 @@
 			<h3>Encoding</h3>
 	<div class="infobox">
 		<p>
-			This QR code is using <b>{{encoding_type}}</b> encoding, and this is represented as <b>{{encoding_code}}</b>
+			This QR code is using <b>{{encoding_type}}</b> encoding, and this is represented as <b>{{encoding_code}}</b>.
 		</p>
 	</div>
 		</div>
@@ -154,7 +154,7 @@
 			<h3>Message Length</h3>
 	<div class="infobox">
 		<p>
-			This data is <b>{{length}}</b> charaters long, and this is encoded as <b>{{length_code}}</b>
+			This data is <b>{{length}}</b> charaters long, and this is encoded as <b>{{length_code}}</b>.
 		</p>
 	</div>
 		</div>
@@ -169,7 +169,7 @@
 			<h3>Your Data</h3>
 	<div class="infobox">
 		<p>
-			Your data encoded into binary is <b>{{encoded_data}}</b>
+			Your data encoded into binary is <b>{{encoded_data}}</b>.
 		</p>
 		</div>
 	</div>
@@ -185,7 +185,7 @@
 			<h3>EoM Indicator</h3>
 	<div class="infobox">
 		<p>
-			Now we add the end of message indicator "0000"
+			Now we add the end of message indicator "0000".
 		</p>
 		</div>
 	</div>
@@ -218,7 +218,7 @@
 			<h3>Filler Data</h3>
 	<div class="infobox">
 		<p>
-			Here we check against a table to  see how much extra space there is before we start the error correction, if there is extra space, we add '11101100' then '00010001' repeatedly until there is enough
+			Here we check against a table to see how much extra space there is before we start the error correction, if there is extra space, we add '11101100' then '00010001' repeatedly until there is enough.
 		</p>
 	</div>
 		</div>
@@ -235,7 +235,7 @@
 			<h3>Error Correction</h3>
 	<div class="infobox">
 		<p>
-			Now we use Reed Solomon error correction on the string so far to get <b>{{full_binary}}</b>. This process is too complex to summarise but you can see the algorithm <a href="/help/rsec">here</a>
+			Now we use Reed Solomon error correction on the string so far to get <b>{{full_binary}}</b>. This process is too complex to summarise but you can see the algorithm <a href="/help/rsec" target=”_blank” >here</a>.
 		</p>
 	</div>
 		</div>
@@ -251,7 +251,7 @@
 			<h3>Place Data</h3>
 	<div class="infobox">
 		<p>
-			Place the data in the QR
+			Place the data in the QR, we do this starting in the bottom right in a zig zag pattern shown <a href="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/QR_Ver3_Codeword_Ordering.svg/1280px-QR_Ver3_Codeword_Ordering.svg.png" target=”_blank” >here</a>.
 		</p>
 	</div>
 		</div>
@@ -266,9 +266,9 @@
 
 <div class=”slice”>
 	<h3>Calculate Mask</h3>
-	<p>To make the QR code easier to read we apply a mask to all of the data bits, to work out whick one to apply, we evaluate each mask using a series of rules as shown <a href="/help/masks">here</a></p>
+	<p>To make the QR code easier to read we apply a mask to all the data bits, to work out which one to apply, we evaluate each mask using a series of rules as shown <a href="/help/masks" target=”_blank” >here</a>.</p>
 	<div class="mask_array">
-		{% for item in [7, 8, 9, 10, 11, 12, 13, 14	] %}
+		{% for item in [9, 10, 11, 12, 13, 14, 15, 16] %}
 		<div class="mask_item">
 		<img src="{{ url_for('serve_image', image_index=item) }}">
 		{{ eval_list[loop.index-1] }}
@@ -284,12 +284,12 @@
 			<h3>Choose Mask</h3>
 	<div class="infobox">
 		<p>
-			The Mask with the lowest penalty is mask {{ mask_id+1 }} so we apply it to the QR Code
+			The Mask with the lowest penalty is mask <b>{{ mask_id }}</b> so we apply it to the QR Code.
 		</p>
 	</div>
 	</div>
 	<div class=”r_preview”>
-		<img src="{{ url_for('serve_image', image_index=15) }}">
+		<img src="{{ url_for('serve_image', image_index=7) }}">
 	</div>	
 
 
@@ -299,33 +299,21 @@
 
 <div class=”slice”>
 	<div class=”info”>
-			<h3></h3>
-	<div class="infobox">
-		<p>
-
-		</p>
+			<h3>Calculate Format Strip</h3>
+		<div class="infobox">
+			<p>
+				Now we know what mask we are using, we can build the format strip, first we combine the error correction code and the mask code to get {{ format_strip_combined_bits }}, then we do some more error correction magic to get {{ format_strip }}. We add this twice to the parts we reserved earlier to get a working QR Code!
+			</p>
+		</div>
 	</div>
 	<div class=”l_preview”>
-		<b>{{i}}</b>
+		<img src="{{ url_for('serve_image', image_index=8) }}">
 	</div>
 
 
 </div>
 
 
-<div class=”slice”>
-	<div class=”info”>
-			<h3></h3>
-	<div class="infobox">
-		<p>
-
-		</p>
-	</div>
-	<div class=”r_preview”>
-	</div>
-
-
-</div>
 
 {% endblock %}
 
