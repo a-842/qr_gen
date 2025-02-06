@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div id="sidebar">
+        <h3>Help Documents</h3>
+        <a href="#" onclick="loadContent('Versions')">Picking a Version</a>
+        <a href="#" onclick="loadContent('RSec')">Reed-Solomon Encoding</a>
+        <a href="#" onclick="loadContent('BCH')">BCH Encoding</a>
+</div>
+    <div id="content">
+        <h2>Welcome</h2>
+        <p>Select a topic from the sidebar.</p>
+    </div>
+
+    <script>
+        const contentMap = {
+            'Versions': '<p>Info on how a version is chosen</p>',
+            'RSec': '<p>Info on Reed-Solomon Encoding</p>',
+            'BCH': '<p>Info on BCH Encoding</p>',
+
+        };
+
+        function loadContent(section) {
+            document.getElementById('content').innerHTML = contentMap[section];
+        }
+    </script>
+
+{% endblock %}

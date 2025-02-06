@@ -37,18 +37,31 @@ def create_image_from_pattern(pattern):
 def index():
     return render_template('index.html')
 
+@app.route('/help')
+def helper():
+    return render_template('help.html')
+
 @app.route('/input')
 def take_input():
     return render_template('input.html')
 
 @app.route('/result', methods=["POST"])
 def result():
-    data_type = request.form['data_type']
-    data = request.form['data']
-    eclevel = request.form['eclevel']
+    if request.form["qr_type"] == "string":
+        data_type = request.form['data_type']
+        data = request.form['data']
+        eclevel = request.form['eclevel']
 
-    qr = QR_Code_String(data_type, data, eclevel)
-    qr.build()
+        qr = QR_Code_String(data_type, data, eclevel)
+        qr.build()
+
+    if request.form["qr_type"] == "wifi":
+        data_type = "bytes"
+        data = request.form['data']
+
+    elif request.form["qr_type"] == "contact":
+        data_type = "bytes"
+
 
     # Save images in session for serving later
     imagedata = []
@@ -104,4 +117,4 @@ def serve_image(image_index):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5005)
+    app.run(debug=True, port=5006)
