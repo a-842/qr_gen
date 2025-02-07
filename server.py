@@ -41,6 +41,10 @@ def index():
 def helper():
     return render_template('help.html')
 
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("404.html")
+
 @app.route('/input')
 def take_input():
     return render_template('input.html')
