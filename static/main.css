@@ -10,34 +10,35 @@ body {
 
 
 .slice {
-    background-color:purple;
+    background-color: rgba(100, 100, 200, 0.3);
+    border-radius: 12px;
     padding: 10px;
     display: flex;
+    margin-top: 15px;
 }
 
+
+
 .info{
-    background-color:red;
     padding: 10px;
     width:60%;
 }
 
 .infobox{
-    background-color:pink;
-    padding: 10px;
+    background-color: #22223b;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: white;
     word-wrap: break-word;
 }
 
-.l_preview {
-    background-color:orange;
+
+.l_preview,
+.r_preview{
     padding: 10px;
     width: 40%;
-
-}
-
-.r_preview {
-    background-color:yellow;
-    padding: 10px;
-    width: 40%;
+    position: relative;
 }
 
 .l_preview img,
@@ -45,9 +46,36 @@ body {
     height: auto;
     width: 60%;
     image-rendering: pixelated;
+    position: absolute;
+    bottom: 0;
 }
 .r_preview img {
-    float: right;
+    right:0;
+}
+
+#mask-slice{
+    display: block;
+}
+
+#mask_array {
+    display:flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.mask_flex_item{
+    flex: 0 0 25%;
+
+}
+
+.mask_item {
+    padding: 10px;
+}
+
+.mask_item img {
+width: 100%;
+height: auto;
+
 }
 
 /* Form Container */
@@ -108,6 +136,12 @@ button:hover {
 
 
 /* Help Pages Formatting */
+#content{
+    background-color: rgba(100, 100, 200, 0.3);
+    padding: 10px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
 
 table {
     width: 100%;

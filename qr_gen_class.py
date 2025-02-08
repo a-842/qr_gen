@@ -107,11 +107,11 @@ class QR_Code_String:
         self.history.append(str(self))
         ic(self)
         self.matrix = self.apply_mask(self.matrix, self.size)
-        self.history.append(str(self))
+        self.history.append(str(self).replace("o", "0").replace("i", "1"))
         ic(self)
         self.matrix, self.format_strip_combined_bits, self.format_strip = self.add_format_strip(self.matrix, self.mask_id, self.eclevel)
         ic(self)
-        self.history.append(str(self))
+        self.history.append(str(self).replace("o", "0").replace("i", "1"))
 
 
 
@@ -321,17 +321,29 @@ class QR_Code_String:
 
         return matrix
 
+    from reedsolo import RSCodec
+
     @staticmethod
     def calculate_reed_solomon_code(current_full, version, eclevel):
+        # Get the number of error correction codewords required for the given version and error correction level
         ec_blocks = raw.error_correction_blocks[version][eclevel]
-        byte_array = []
-        for i in range(0, len(current_full), 8):
-            byte = current_full[i:i + 8]
-            byte_array.append(int(byte, 2))
 
+        # Convert the binary string into a list of integers (bytes)
+        byte_array = [int(current_full[i:i + 8], 2) for i in range(0, len(current_full), 8)]
+
+        # Initialize the Reed-Solomon codec with the number of error correction codewords
         rs = RSCodec(ec_blocks)
+
+        # Encode the data with Reed-Solomon error correction
         encoded_data = rs.encode(byte_array)
-        return ''.join(f"{byte:08b}" for byte in encoded_data).replace("1", "i").replace("0", "o")
+
+        # Convert the encoded data back to a binary string
+        binary_string = ''.join(f"{byte:08b}" for byte in encoded_data)
+
+        # Replace '1's with 'i' and '0's with 'o' (if needed for your specific use case)
+        binary_string = binary_string.replace("1", "i").replace("0", "o")
+
+        return binary_string
 
     @staticmethod
     def evaluate_mask(array):
@@ -376,17 +388,14 @@ class QR_Code_String:
         def penalty_rule_3(arr):
             penalty = 0
             pattern = [1, 0, 1, 1, 1, 0, 1]
-            rev_pattern = pattern[::-1]
 
             # Check rows
             for row in arr:
                 penalty += count_pattern(row, pattern)
-                penalty += count_pattern(row, rev_pattern)
 
             # Check columns
             for col in arr.T:
                 penalty += count_pattern(col, pattern)
-                penalty += count_pattern(col, rev_pattern)
 
             return penalty
 
@@ -429,15 +438,19 @@ class QR_Code_String:
         def get_key(idx):
             return self.masks[idx][1]
 
-        best_mask_index = min(range(len(self.masks)), key=get_key)
+        ic(self.masks)
+        best_mask_index = 0
+        best_mask_penalty = 9999
+        for i, x in enumerate(self.masks):
+            if x[1] < best_mask_penalty:
+                best_mask_index = i
+                best_mask_penalty = x[1]
+        ic(best_mask_index)
+
 
         best_mask_string = self.masks[best_mask_index][0]
         ic(best_mask_string)
-        best_mask_matrix = [
-            [0 if char in ("o", 0) else 1 if char in ("i", 1) else "f" if char == "f" else None for char in best_mask_string[i * size:(i + 1) * size]]
-            for i in range(size)
-        ]
-        self.mask_id = best_mask_index
+        self.mask_id = best_mask_index+1
         return self.attempt_mask(matrix, size, self.mask_id)
 
 

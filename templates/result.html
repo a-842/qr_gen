@@ -242,7 +242,7 @@ body {
 			<h3>Error Correction</h3>
 	<div class="infobox">
 		<p>
-			Now we use Reed Solomon error correction on the string so far to get <b>{{full_binary}}</b>. This process is too complex to summarise but you can see the algorithm <a href="/help/rsec" target="_blank" >here</a>.
+			Now we use Reed Solomon error correction on the string so far to get <b>{{full_binary}}</b>. This process is too complex to summarise but you can see the algorithm <a href="/help" target="_blank" >here</a>.
 		</p>
 	</div>
 		</div>
@@ -271,14 +271,22 @@ body {
 
 
 
-<div class="slice">
-	<h3>Calculate Mask</h3>
-	<p>To make the QR code easier to read we apply a mask to all the data bits, to work out which one to apply, we evaluate each mask using a series of rules as shown <a href="/help/masks" target="_blank" >here</a>.</p>
-	<div class="mask_array">
+<div class="slice" id="mask-slice">
+	<div class="info">
+
+		<h3>Calculate Mask</h3>
+		<div class="infobox">
+			<p>To make the QR code easier to read we apply a mask to all the data bits, to work out which one to apply, we evaluate each mask using a series of rules as shown <a href="/help/masks" target="_blank" >here</a>.</p>
+		</div>
+	</div>
+	<div id="mask_array">
 		{% for item in [9, 10, 11, 12, 13, 14, 15, 16] %}
-		<div class="mask_item">
-		<img src="{{ url_for('serve_image', image_index=item) }}">
-		{{ eval_list[loop.index-1] }}
+		<div class="mask_flex_item">
+			<div class="mask_item">
+				<img src="{{ url_for('serve_image', image_index=item) }}">
+				Penalty: {{ eval_list[loop.index-1] }}
+			</div>
+
 		</div>
 		{% endfor %}
 	</div>
@@ -320,7 +328,88 @@ body {
 
 </div>
 
+<div class="slice">
+	<a href="/quick-download">
+    <button>Quick Download</button>
+</a>
+	<button onclick="openModal()">Advanced Download</button>
+</div>
 
+<div id="modal" style="display:none;">
+        <label>Foreground Color: <input type="color" id="fg_color" value="#000000"></label>
+        <label>Background Color: <input type="color" id="bg_color" value="#ffffff"></label>
+        <label>Format:
+            <select id="format" onchange="handleFormatChange()">
+                <option value="png">PNG</option>
+                <option value="jpg">JPG</option>
+                <option value="gif">GIF</option>
+                <option value="txt">TXT</option>
+            </select>
+        </label>
+        <p id="error_msg" style="color:red;"></p>
+        <button onclick="downloadQRCode()">Download</button>
+        <button onclick="closeModal()">Cancel</button>
+    </div>
+
+<script>
+        function openModal() {
+            document.getElementById("modal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("modal").style.display = "none";
+            document.getElementById("error_msg").innerText = "";
+        }
+
+        function handleFormatChange() {
+            const format = document.getElementById("format").value;
+            const colorPickers = document.querySelectorAll("input[type=color]");
+
+            if (format === "txt") {
+                colorPickers.forEach(picker => {
+                    picker.disabled = true;
+                    picker.style.opacity = "0.5";
+                });
+                document.getElementById("error_msg").innerText = "Colored QR Codes are not supported in TXT format.";
+            } else {
+                colorPickers.forEach(picker => {
+                    picker.disabled = false;
+                    picker.style.opacity = "1";
+                });
+                document.getElementById("error_msg").innerText = "";
+            }
+        }
+
+        function downloadQRCode() {
+            const fg_color = document.getElementById("fg_color").value;
+            const bg_color = document.getElementById("bg_color").value;
+            const format = document.getElementById("format").value;
+
+            fetch('/advanced-download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ foreground: fg_color, background: bg_color, format: format })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error); });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `QR.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                document.getElementById("error_msg").innerText = error.message;
+            });
+        }
+    </script>
 
 {% endblock %}
 
