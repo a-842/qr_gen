@@ -3,7 +3,7 @@
 {% block body %}
 
 <!-- Buttons to switch between different input types -->
-<div>
+<div id="form-buttons">
     <button class="form-button" onclick="showForm('string')">String</button>
     <button class="form-button" onclick="showForm('contact')">Contact</button>
     <button class="form-button" onclick="showForm('wifi')">WiFi</button>
@@ -133,7 +133,11 @@
         document.getElementById('form-wifi').style.display = 'none';
 
         document.getElementById('form-' + formType).style.display = 'block';
+
     }
+
+
 </script>
 
 {% endblock %}
+

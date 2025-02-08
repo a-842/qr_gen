@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, Response, make_response
+from flask import Flask, render_template, request, Response, make_response, redirect, url_for
 from qr_gen_class import QR_Code_String
 from PIL import Image
 import io
 import base64
 from icecream import ic
+import traceback
 
 app = Flask(__name__)
 app.secret_key = 'guess'
@@ -31,7 +32,7 @@ def create_image_from_pattern(pattern):
                 pixels[x, y] = (187, 187, 187)
             elif char == 'f':
                 pixels[x, y] = (0,255,0)
-    return image#.resize((200, 200),resample=Image.BOX)
+    return image.resize((200, 200),resample=Image.BOX)
 
 @app.route('/')
 def index():
@@ -41,9 +42,25 @@ def index():
 def helper():
     return render_template('help.html')
 
+# Error Handling
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template("404.html")
+
+@app.route('/error')
+def error_page():
+    error_log = request.args.get("error_log", "")
+    return render_template("error.html", error_log=error_log)
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    error_trace = traceback.format_exc()
+    print(error_trace)
+    return redirect(url_for("error_page", error_log=error_trace))
+
+
+
 
 @app.route('/input')
 def take_input():
@@ -51,7 +68,8 @@ def take_input():
 
 @app.route('/result', methods=["POST"])
 def result():
-    if request.form["qr_type"] == "string":
+    print("Generating a", request.form["form_type"], "QR Code")
+    if request.form["form_type"] == "string":
         data_type = request.form['data_type']
         data = request.form['data']
         eclevel = request.form['eclevel']
@@ -59,11 +77,11 @@ def result():
         qr = QR_Code_String(data_type, data, eclevel)
         qr.build()
 
-    if request.form["qr_type"] == "wifi":
+    elif request.form["form_type"] == "wifi":
         data_type = "bytes"
         data = request.form['data']
 
-    elif request.form["qr_type"] == "contact":
+    elif request.form["form_type"] == "contact":
         data_type = "bytes"
 
 
@@ -116,7 +134,7 @@ def result():
 @app.route('/image/<int:image_index>')
 def serve_image(image_index):
     cookie = request.cookies.get(str(image_index))
-    img_data = base64.b64decode(cookie)#.resize((200, 200),resample=Image.BOX)
+    img_data = base64.b64decode(cookie)
     return Response(img_data, mimetype="image/WEBP")
 
 

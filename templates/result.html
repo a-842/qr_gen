@@ -1,5 +1,15 @@
 {% extends 'base.html' %}
 
+{% block head %}
+
+<style>
+body {
+    max-width: 1200;
+}
+</style>
+
+{% endblock %}
+
 {% block body %}
 
 
@@ -99,7 +109,7 @@
 		</p>
 	</div>
 		</div>
-	<div class="r_preview">
+	<div class="l_preview">
 		<img src="{{ url_for('serve_image', image_index=4) }}">
 	</div>
 
@@ -115,7 +125,7 @@
 		</p>
 	</div>
 		</div>
-	<div class="l_preview">
+	<div class="r_preview">
 		<img src="{{ url_for('serve_image', image_index=5) }}">
 	</div>	
 

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h1>An error occurred</h1>
+    <p>Something went wrong. Please report this issue.</p>
+    <textarea readonly rows="10" cols="80">{{ error_log }}</textarea>
+    <button onclick="copyToClipboard()">Copy Error Log</button>
+<a href="https://github.com/a-842/qr_gen/issues/new?template=Blank+issue"><button>Report on Github</button></a>
+
+    <script>
+        function copyToClipboard() {
+            var textarea = document.querySelector("textarea");
+            textarea.select();
+            document.execCommand("copy");
+            alert("Copied to clipboard!");
+        }
+    </script>
+
+{% endblock %}

@@ -1,7 +1,7 @@
 body {
     background-image: conic-gradient(from 55deg,  #99a4fe, #b3bcfe);
     background-attachment: fixed;
-    font-family: "Noto Sans Grantha", sans-serif;
+    font-family: "Arvo", sans-serif;
     line-height: 1.6;
     max-width: 800px;
     margin: 20px auto;
@@ -10,10 +10,44 @@ body {
 
 
 .slice {
-  display: flex; 
-  width: 100%; 
-  gap: 10px; 
-  padding: 50px;
+    background-color:purple;
+    padding: 10px;
+    display: flex;
+}
+
+.info{
+    background-color:red;
+    padding: 10px;
+    width:60%;
+}
+
+.infobox{
+    background-color:pink;
+    padding: 10px;
+    word-wrap: break-word;
+}
+
+.l_preview {
+    background-color:orange;
+    padding: 10px;
+    width: 40%;
+
+}
+
+.r_preview {
+    background-color:yellow;
+    padding: 10px;
+    width: 40%;
+}
+
+.l_preview img,
+.r_preview img {
+    height: auto;
+    width: 60%;
+    image-rendering: pixelated;
+}
+.r_preview img {
+    float: right;
 }
 
 /* Form Container */
@@ -22,7 +56,7 @@ form {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 50%;
+    max-width: 100%;
     margin: 20px auto;
     display: flex;
     flex-direction: column;
@@ -53,9 +87,9 @@ form textarea {
 }
 
 
+/* Global Button Formatting */
 
-/* Form Toggle Buttons */
-.form-button {
+button {
     background-color: #4a4e69;
     color: #fff;
     border: none;
@@ -67,10 +101,11 @@ form textarea {
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.form-button:hover {
+button:hover {
     background-color: #9a8c98;
     transform: scale(1.05);
 }
+
 
 /* Help Pages Formatting */
 
