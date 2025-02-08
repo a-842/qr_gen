@@ -1,7 +1,11 @@
 body {
     background-image: conic-gradient(from 55deg,  #99a4fe, #b3bcfe);
     background-attachment: fixed;
-    font-family: "Noto Sans Grantha", serif;
+    font-family: "Noto Sans Grantha", sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
 }
 
 
@@ -68,3 +72,37 @@ form textarea {
     transform: scale(1.05);
 }
 
+/* Help Pages Formatting */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+ }
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+}
+th {
+    background-color: #f4f4f4;
+}
+.highlight-column {
+    background-color: lightblue;
+}
+.highlight-cell {
+    background-color: darkblue;
+    color: white;
+}
+
+code {
+    background-color: #eaeaea;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+pre {
+    background-color: #eaeaea;
+    padding: 10px;
+    border-radius: 5px;
+    word-break: break-all;
+}

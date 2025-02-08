@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Correction in QR Code Format Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        code {
+            background-color: #eaeaea;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #eaeaea;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <h1>Error Correction in QR Code Format Information</h1>
+    <p>The error correction mechanism for QR code format information ensures that the encoded data (error correction level and mask pattern) can be accurately recovered even if the QR code is damaged or tampered with. This document explains the process, including encoding, tampering, and decoding, with an example.</p>
+
+    <h2>Encoding Process</h2>
+    <h3>Input Data</h3>
+    <ul>
+        <li><strong>Error Correction (EC) Bits</strong>: 2 bits representing the error correction level (e.g., <code>01</code> for Medium).</li>
+        <li><strong>Mask Bits</strong>: 3 bits indicating the mask pattern (e.g., <code>011</code> for Mask 3).</li>
+        <li><strong>Combined Bits</strong>: Concatenate EC and mask bits (<code>01</code> + <code>011</code> = <code>01011</code>).</li>
+    </ul>
+
+    <h3>Polynomial Division</h3>
+    <ul>
+        <li><strong>Generator Polynomial</strong>: <code>0b10100110111</code> (11 bits).</li>
+        <li>Convert <code>combined_bits</code> to an integer and shift left by 10 bits to create space for error correction bits.</li>
+        <li>Perform polynomial division using the generator to compute a 10-bit <strong>remainder</strong> (error correction code).</li>
+    </ul>
+
+    <h3>Format Bits Construction</h3>
+    <ul>
+        <li>Combine the original <code>combined_bits</code> (shifted left) with the computed 10-bit remainder.</li>
+        <li>XOR the result with a fixed <strong>mask pattern</strong> (<code>0b101010000010010</code>) to produce the final 15-bit format string.</li>
+    </ul>
+
+    <h2>Example: Encoding</h2>
+    <h3>Input</h3>
+    <ul>
+        <li>EC Level: <code>01</code> (Medium)</li>
+        <li>Mask ID: <code>011</code> (Mask 3)</li>
+        <li>Combined Bits: <code>01011</code></li>
+    </ul>
+
+    <h3>Polynomial Division</h3>
+    <pre>
+Shift 01011 by 10 bits: 010110000000000
+Divide by 0b10100110111 to compute remainder: 0000101001
+        (41 in decimal)
+    </pre>
+
+    <h3>Final Format String</h3>
+    <pre>
+0101100000101001
+XOR
+101010000010010
+-----------------
+111100000001101
+    </pre>
+    <p><strong>Encoded Output</strong>: <code>111100000001101</code></p>
+
+    <h2>Tampering Example</h2>
+    <p>Suppose the encoded format string <code>111100000001101</code> is tampered with, flipping the last bit:</p>
+    <p><strong>Tampered String</strong>: <code>111100000001100</code></p>
+
+    <h2>Decoding Process</h2>
+    <h3>Recovery</h3>
+    <pre>
+111100000001100
+XOR
+101010000010010
+-----------------
+010110000011110
+    </pre>
+    <p>Split into <code>combined_bits</code> (<code>01011</code>) and corrupted error bits (<code>0000011110</code>).</p>
+
+    <h3>Error Detection</h3>
+    <p>Recompute the expected error bits using <code>01011</code> and polynomial division (original remainder: <code>0000101001</code>).</p>
+    <p>Compare with corrupted error bits (<code>0000011110</code>). The mismatch indicates errors.</p>
+
+    <h3>Error Correction</h3>
+    <p>The BCH code corrects up to 3 errors. By analyzing discrepancies, the decoder identifies and flips the erroneous bit (last bit).</p>
+
+    <h3>Corrected Output</h3>
+    <p>After correction, the original format string <code>111100000001101</code> is restored.</p>
+
+    <h2>Summary</h2>
+    <p>This error correction method ensures QR codes remain readable despite partial damage. By encoding redundancy (error correction bits) and using XOR with a mask pattern, errors can be detected and corrected during decoding. The example demonstrates resilience against tampering, highlighting the robustness of QR code format information.</p>
+</body>
+</html>
