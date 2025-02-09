@@ -139,8 +139,8 @@ def serve_image(image_index):
     return Response(img_data, mimetype="image/WEBP")
 
 
-@app.route('/quick-download)')
-def quickdownload():
+@app.route('/quick-download')
+def quick_download():
     cookie = request.cookies.get("8")
 
     img_data = base64.b64decode(cookie)
@@ -182,7 +182,7 @@ def advanced_download():
         qr_array = np.array(img)
         text_output = "\n".join(["".join(["  " if bit else "██" for bit in row]) for row in qr_array])
         img_io.write(text_output.encode())
-        img_io.seek(0)  # Reset the stream position
+        img_io.seek(0)
 
         return send_file(
             img_io,
@@ -197,7 +197,7 @@ def advanced_download():
         if sum(fg_color) > sum(bg_color):
             return jsonify({'error': 'Foreground must be darker than background'}), 400
         pixels = img.load()
-        pixel_list = []  # Store updated pixels
+        pixel_list = []
 
         for y in range(height):
             for x in range(width):
@@ -214,10 +214,12 @@ def advanced_download():
         new_img = new_img.resize((new_img.size[0] * 80, new_img.size[1] * 80), resample=Image.BOX)
 
         if file_format == "gif":
-            new_img = new_img.convert("P")  # Convert correctly
+            new_img = new_img.convert("P")
+        elif file_format == "jpeg":
+            new_img = new_img.convert("RGB")
 
-        new_img.save(img_io, format=file_format.upper())  # Save in correct format
-        img_io.seek(0)  # Reset for sending
+        new_img.save(img_io, format=file_format.upper())
+        img_io.seek(0)
 
     return send_file(
         img_io,

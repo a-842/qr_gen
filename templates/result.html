@@ -2,11 +2,9 @@
 
 {% block head %}
 
-<style>
-body {
-    max-width: 1200;
-}
-</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
 {% endblock %}
 
@@ -333,24 +331,26 @@ body {
     <button>Quick Download</button>
 </a>
 	<button onclick="openModal()">Advanced Download</button>
+	<button id="download-pdf">Download as PDF</button>
 </div>
 
 <div id="modal" style="display:none;">
+	<div id="modal-content">
         <label>Foreground Color: <input type="color" id="fg_color" value="#000000"></label>
         <label>Background Color: <input type="color" id="bg_color" value="#ffffff"></label>
         <label>Format:
             <select id="format" onchange="handleFormatChange()">
                 <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
+                <option value="jpeg">JPG</option>
                 <option value="gif">GIF</option>
                 <option value="txt">TXT</option>
             </select>
         </label>
-        <p id="error_msg" style="color:red;"></p>
+        <p id="error_msg"></p>
         <button onclick="downloadQRCode()">Download</button>
         <button onclick="closeModal()">Cancel</button>
     </div>
-
+</div>
 <script>
         function openModal() {
             document.getElementById("modal").style.display = "block";
@@ -409,6 +409,26 @@ body {
                 document.getElementById("error_msg").innerText = error.message;
             });
         }
+
+document.getElementById("download-pdf").addEventListener("click", async () => {
+    const { jsPDF } = window.jspdf;
+
+    const canvas = await html2canvas(document.body, { scale: 2, useCORS: true });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdfWidth = 210;
+
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    const pdf = new jsPDF("p", "mm", [pdfWidth, imgHeight]);
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, imgHeight);
+
+    pdf.save("QR_Explainer.pdf");
+});
+
+
     </script>
 
 {% endblock %}
