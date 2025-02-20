@@ -6,6 +6,7 @@ import base64
 from icecream import ic
 import traceback
 import numpy as np
+ic.disable()
 
 app = Flask(__name__)
 app.secret_key = 'guess'
