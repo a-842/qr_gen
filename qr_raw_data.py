@@ -243,5 +243,6 @@ color_mapping = {
         'o': (50, 50, 50),  # Dark Grey
         0: (255, 255, 255),   # White
         1: (0, 0, 0), # Black
+        "f": (0, 255, 0) # Green 
     }
 

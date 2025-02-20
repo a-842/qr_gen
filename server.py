@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, send_file, request, Response, make_response, redirect, url_for
-from qr_gen_class import QR_Code_String
+from qr_gen_class import QR_Code_String, create_wifi, create_vcard
 from PIL import Image
 import io
 import base64
@@ -73,18 +73,20 @@ def result():
     if request.form["form_type"] == "string":
         data_type = request.form['data_type']
         data = request.form['data']
-        eclevel = request.form['eclevel']
 
-        qr = QR_Code_String(data_type, data, eclevel)
-        qr.build()
 
     elif request.form["form_type"] == "wifi":
         data_type = "bytes"
-        data = request.form['data']
+        data = create_wifi(request.form['ssid'], request.form['encryption'], request.form['password'])
 
     elif request.form["form_type"] == "contact":
         data_type = "bytes"
+        data = create_vcard(request.form['fname'], request.form['lname'], request.form['title'], request.form['gender'], request.form['bday'], request.form['email'], request.form['phone'], request.form['street'], request.form['city'], request.form['county'], request.form['postcode'], request.form['country'], request.form['role'], request.form['org'], request.form['url'], )
 
+    eclevel = request.form['eclevel']
+
+    qr = QR_Code_String(data_type, data, eclevel)
+    qr.build()
 
     # Save images in session for serving later
     imagedata = []

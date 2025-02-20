@@ -174,10 +174,10 @@ class QR_Code_String:
                 self.binary_data += f'{int(group):04b}'  # 1 digit -> 4 bits
 
     def encode_alphanumeric(self):
-
+        data = self.data.upper()
         self.binary_data = ''
-        for i in range(0, len(self.data), 2):
-            group = self.data[i:i + 2]
+        for i in range(0, len(data), 2):
+            group = data[i:i + 2]
             if len(group) == 2:
                 # Two characters -> 11 bits
                 value = raw.alphanumeric_table[group[0]] * 45 + raw.alphanumeric_table[group[1]]
@@ -543,31 +543,10 @@ class QR_Code_String:
         return matrix, str(combined_bits), format_strip
 
 
-class QR_Code_Contact(QR_Code_String):
-    def __init__(self, data_type, data, eclevel):
-        super().__init__(data_type, "Placeholder", eclevel)
-        self.fname = ""
-        self.lname = ""
-        self.title = ""
-        self.gender = ""
-        self.bday = ""
-        self.email = ""
-        self.phone = ""
-        self.street = ""
-        self.city = ""
-        self.county = ""
-        self.postcode = ""
-        self.country = ""
-        self.role = ""
-        self.org = ""
-        self.url = ""
-    def build(self):
-        self.data = QR_Code_Contact.create_vcard(self.fname, self.lname, self.title, self.gender, self.bday, self.email, self.phone,)
-        super().build()
-    @staticmethod
-    def create_vcard(fname, lname, title, gender, bday, email, phone, street, city, county, postcode, country, role,
+
+def create_vcard(fname, lname, title, gender, bday, email, phone, street, city, county, postcode, country, role,
                      company, website):
-        vcard = f"""BEGIN:VCARD
+        return f"""BEGIN:VCARD
     VERSION:4.0
     FN:{fname} {lname}
     N:{lname};{fname};;{title};
@@ -580,7 +559,10 @@ class QR_Code_Contact(QR_Code_String):
     ORG:{company}
     URL:{website}
     END:VCARD"""
-        return vcard
+
+
+def create_wifi(SSID, encryption, password):
+    return f"WIFI:S:{SSID};T:{encryption};P:{password};;"
 
 if __name__ == "__main__":
     import server

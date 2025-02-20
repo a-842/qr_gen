@@ -125,7 +125,7 @@
         <button class="form-button" type="submit">Generate QR Code</button>
     </form>
 </div>
-
+<!-- script for switching -->
 <script>
     function showForm(formType) {
         document.getElementById('form-string').style.display = 'none';
@@ -138,6 +138,80 @@
 
 
 </script>
+<!-- contact form logic -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("#form-contact form");
+
+    form.addEventListener("submit", function (event) {
+        let valid = true;
+        let errors = [];
+
+        // Get form elements
+        const fname = document.getElementById("fname");
+        const lname = document.getElementById("lname");
+        const phone = document.getElementById("phone");
+        const email = document.getElementById("email");
+
+        // Reset previous error styling
+        document.querySelectorAll("input").forEach(input => {
+            input.style.border = "";
+        });
+
+        // Check if any data is entered at all
+        const hasData = [...form.elements].some(input => input.type !== "hidden" && input.value.trim() !== "");
+
+        if (!hasData) {
+            event.preventDefault();
+            errors.push("Please enter some data");
+            document.querySelectorAll("input").forEach(input => {
+                if (input.type !== "hidden") input.style.border = "2px solid red";
+            });
+        }
+
+        // Check first name
+        if (fname.value.trim() === "") {
+            event.preventDefault();
+            valid = false;
+            errors.push("Are you sure you want to proceed without a first name?");
+            fname.style.border = "2px solid red";
+        }
+
+        // Check last name
+        if (lname.value.trim() === "") {
+            event.preventDefault();
+            valid = false;
+            errors.push("Are you sure you want to proceed without a surname?");
+            lname.style.border = "2px solid red";
+        }
+
+        // Validate phone number format
+        const phoneRegex = /^\+?\d{2,3}\s?\d{4,5}\s?\d{5,6}$/;
+        if (phone.value.trim() !== "" && !phoneRegex.test(phone.value.trim())) {
+            event.preventDefault();
+            valid = false;
+            errors.push("Please enter a phone number in the format ‘+xx xxxxx xxxxxx’");
+            phone.style.border = "2px solid red";
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email.value.trim() !== "" && !emailRegex.test(email.value.trim())) {
+            event.preventDefault();
+            valid = false;
+            errors.push("Please enter a valid email");
+            email.style.border = "2px solid red";
+        }
+
+        // Show error messages
+        if (!valid || errors.length > 0) {
+            event.preventDefault();
+            alert(errors.join("\n"));
+        }
+    });
+});
+</script>
+
 
 {% endblock %}
 
