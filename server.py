@@ -71,6 +71,7 @@ def take_input():
 @app.route('/result', methods=["POST"])
 def result():
     print("Generating a", request.form["form_type"], "QR Code")
+    print("Received data:", request.form)
     if request.form["form_type"] == "string":
         data_type = request.form['data_type']
         data = request.form['data']
@@ -87,7 +88,11 @@ def result():
     eclevel = request.form['eclevel']
 
     qr = QR_Code_String(data_type, data, eclevel)
-    qr.build()
+    try:
+        qr.build()
+    except Exception as e:
+        print(f"Error while generating QR code: {e}")
+        return "Error in QR code generation", 500
 
     # Save images in session for serving later
     imagedata = []
@@ -96,6 +101,8 @@ def result():
         img_io = io.BytesIO()
         img.save(img_io, "WEBP")
         img_io.seek(0)
+        img_size = len(img_io.getvalue())
+        print(f"Image size: {img_size} bytes")
         imagedata.append(base64.b64encode(img_io.getvalue()).decode('utf-8'))
     eval_list = []
     for step in qr.masks:
