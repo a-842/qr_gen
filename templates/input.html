@@ -14,7 +14,7 @@
     <form action="/result" method="post">
         <input type="hidden" name="form_type" value="string">
         <label for="data">Data:</label>
-        <input type="text" id="data" name="data" required>
+        <input type="text" id="data" name="data" maxlength="300" required>
 
         <label for="data_type">Data Type:</label>
         <select id="data_type" name="data_type" required>
@@ -138,12 +138,57 @@
 
 
 </script>
-<!-- contact form logic -->
+<!-- form validation logic -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const form = document.querySelector("#form-contact form");
+    const formString = document.querySelector("#form-string form"); // Get the form for the string type
+    const formContact = document.querySelector("#form-contact form"); // Get the form for the contact type
 
-    form.addEventListener("submit", function (event) {
+    // Handle submit event for the string form
+    formString.addEventListener("submit", function (event) {
+        event.preventDefault(); // Stop form from submitting immediately
+
+        let issues = [];
+        let data = document.getElementById("data"); // Input field with id "data"
+        let inputs = formString.querySelectorAll("input");
+
+        // Reset field styles
+        inputs.forEach(input => input.style.border = "");
+
+        // ISO-8859-1 validation check for "data" input field (in the "string" form)
+        if (data && data.value.trim()) {
+            function is_iso_8859_1_encodable(input_string) {
+                // Create a temporary element to test ISO-8859-1 encoding.
+                try {
+                    let encodedString = unescape(encodeURIComponent(input_string));
+                    return encodedString === input_string;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            // Check if the "data" input has ISO-8859-1 encodable characters
+            if (!is_iso_8859_1_encodable(data.value.trim())) {
+                issues.push("The input for 'data' contains characters that cannot be encoded in ISO-8859-1.");
+                data.style.border = "2px solid red";
+            }
+        }
+
+        // If there are issues, show confirmation
+        if (issues.length > 0) {
+            let message = issues.join("\n");
+            let confirmProceed = confirm(message + "\n\nClick OK to proceed anyway, or Cancel to amend.");
+
+            if (!confirmProceed) {
+                return; // Stop form submission so the user can amend
+            }
+        }
+
+        formString.submit(); // Proceed with form submission if user chooses to
+    });
+
+    // Handle submit event for the contact form
+    formContact.addEventListener("submit", function (event) {
         event.preventDefault(); // Stop form from submitting immediately
 
         let issues = [];
@@ -151,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let lname = document.getElementById("lname");
         let phone = document.getElementById("phone");
         let email = document.getElementById("email");
-        let inputs = form.querySelectorAll("input");
+        let inputs = formContact.querySelectorAll("input");
 
         // Reset field styles
         inputs.forEach(input => input.style.border = "");
@@ -199,9 +244,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        form.submit(); // Proceed with form submission if user chooses to
+        formContact.submit(); // Proceed with form submission if user chooses to
     });
 });
+
 </script>
 
 
