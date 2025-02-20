@@ -543,22 +543,34 @@ class QR_Code_String:
         return matrix, str(combined_bits), format_strip
 
 
+def create_vcard(fname, lname, title, gender, bday, email, phone, street,
+                 city, county, postcode, country, role, company, website):
+    vcard = f"""BEGIN:VCARD
+VERSION:4.0
+FN:{fname} {lname}
+N:{lname};{fname};;{title if title else ''}
+"""
 
-def create_vcard(fname, lname, title, gender, bday, email, phone, street, city, county, postcode, country, role,
-                     company, website):
-        return f"""BEGIN:VCARD
-    VERSION:4.0
-    FN:{fname} {lname}
-    N:{lname};{fname};;{title};
-    GENDER:{gender}
-    BDAY:{bday}
-    EMAIL:{email}
-    TEL;TYPE=cell:{phone}
-    ADR;TYPE=HOME:;;{street};{city};{county};{postcode};{country}
-    ROLE:{role}
-    ORG:{company}
-    URL:{website}
-    END:VCARD"""
+    if gender:
+        vcard += f"GENDER:{gender}\n"
+    if bday:
+        vcard += f"BDAY:{bday}\n"
+    if email:
+        vcard += f"EMAIL:{email}\n"
+    if phone:
+        vcard += f"TEL;TYPE=cell:{phone}\n"
+    if any([street, city, county, postcode, country]):  # Check if any address field is non-empty
+        vcard += f"ADR;TYPE=HOME:;;{street if street else ''};{city if city else ''};{county if county else ''};{postcode if postcode else ''};{country if country else ''}\n"
+    if role:
+        vcard += f"ROLE:{role}\n"
+    if company:
+        vcard += f"ORG:{company}\n"
+    if website:
+        vcard += f"URL:{website}\n"
+
+    vcard += "END:VCARD"
+
+    return vcard
 
 
 def create_wifi(SSID, encryption, password):
