@@ -342,7 +342,7 @@
 </div>
 
 <div class="slice">
-	<a href="/quick-download">
+	<a href="/quick-download" id="quickDownloadLink">
     <button>Quick Download</button>
 </a>
 	<button onclick="openModal()">Advanced Download</button>
@@ -366,7 +366,21 @@
         <button onclick="closeModal()">Cancel</button>
     </div>
 </div>
-<script>
+<script>let isCooldown = false;
+
+document.getElementById("quickDownloadLink").addEventListener("click", function(event) {
+    if (isCooldown) {
+        event.preventDefault(); // Prevents navigation if within cooldown
+        return;
+    }
+
+    isCooldown = true;
+
+    setTimeout(() => {
+        isCooldown = false;
+    }, 5000);
+});
+
         function openModal() {
             document.getElementById("modal").style.display = "block";
         }
