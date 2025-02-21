@@ -133,6 +133,7 @@ def result():
         mask_id=qr.mask_id,
         format_strip_combined_bits=qr.format_strip_combined_bits,
         format_strip=qr.format_strip,
+        data=data,
 
 
     ))
