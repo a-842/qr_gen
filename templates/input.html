@@ -141,6 +141,7 @@
 <!-- form validation logic -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const formString = document.querySelector("#form-string form"); // Get the form for the string type
     const formContact = document.querySelector("#form-contact form"); // Get the form for the contact type
 
     // Handle submit event for the string form
@@ -154,7 +155,37 @@ document.addEventListener("DOMContentLoaded", function () {
         // Reset field styles
         inputs.forEach(input => input.style.border = "");
 
+        // ISO-8859-1 validation check for "data" input field (in the "string" form)
+        if (data && data.value.trim()) {
+            function is_iso_8859_1_encodable(input_string) {
+                // Create a temporary element to test ISO-8859-1 encoding.
+                try {
+                    let encodedString = unescape(encodeURIComponent(input_string));
+                    return encodedString === input_string;
+                } catch (e) {
+                    return false;
+                }
+            }
 
+            // Check if the "data" input has ISO-8859-1 encodable characters
+            if (!is_iso_8859_1_encodable(data.value.trim())) {
+                issues.push("The input for 'data' contains characters that cannot be encoded in ISO-8859-1.");
+                data.style.border = "2px solid red";
+            }
+        }
+
+        // If there are issues, show confirmation
+        if (issues.length > 0) {
+            let message = issues.join("\n");
+            let confirmProceed = confirm(message + "\n\nClick OK to proceed anyway, or Cancel to amend.");
+
+            if (!confirmProceed) {
+                return; // Stop form submission so the user can amend
+            }
+        }
+
+        formString.submit(); // Proceed with form submission if user chooses to
+    });
 
     // Handle submit event for the contact form
     formContact.addEventListener("submit", function (event) {
@@ -214,32 +245,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         formContact.submit(); // Proceed with form submission if user chooses to
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const allowedCharacters = /^[\x20-\x7E\u00A0\u00A1\u00A2\u00A3\u00A4\u00A5\u00A6\u00A7\u00A8\u00A9\u00AA\u00AB\u00AC\u00AD\u00AE\u00AF\u00B0\u00B1\u00B2\u00B3\u00B4\u00B5\u00B6\u00B7\u00B8\u00B9\u00BA\u00BB\u00BC\u00BD\u00BE\u00BF\u00C0-\u00FF]+$/;
-
-    document.querySelectorAll("form").forEach(form => {
-        form.addEventListener("submit", function (event) {
-            let isValid = true;
-            let invalidFields = [];
-
-            form.querySelectorAll("input, select, textarea").forEach(field => {
-                if (field.type !== "hidden" && field.value.trim() !== "") {
-                    if (!allowedCharacters.test(field.value)) {
-                        isValid = false;
-                        invalidFields.push(field);
-                    }
-                }
-            });
-
-            if (!isValid) {
-                event.preventDefault();
-                alert("Some fields contain invalid characters.");
-                invalidFields[0].focus();  // Focus on the first invalid field
-            }
-        });
     });
 });
 
